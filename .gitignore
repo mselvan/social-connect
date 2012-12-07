@@ -1,5 +1,10 @@
 #java specific
 *.class
 
+# Eclipse specific
+.classpath
+.project
+.settings/
+
 ## generic files to ignore
 *~

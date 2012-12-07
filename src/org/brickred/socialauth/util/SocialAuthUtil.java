@@ -26,24 +26,8 @@
 package org.brickred.socialauth.util;
 
 import java.text.DateFormatSymbols;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class SocialAuthUtil {
-
-	public static Map<String, String> getRequestParametersMap(
-			final HttpServletRequest request) {
-		Map<String, String[]> map = request.getParameterMap();
-		Map<String, String> paramsMap = new HashMap<String, String>();
-		for (Map.Entry<String, String[]> entry : map.entrySet()) {
-			String key = entry.getKey();
-			String values[] = entry.getValue();
-			paramsMap.put(key, values[0].toString()); // Only 1 value is
-		}
-		return paramsMap;
-	}
 
 	/**
 	 * This method will convert month name to an int value.

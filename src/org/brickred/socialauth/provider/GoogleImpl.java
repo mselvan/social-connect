@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
@@ -52,7 +50,6 @@ import org.brickred.socialauth.util.MethodType;
 import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.OpenIdConsumer;
 import org.brickred.socialauth.util.Response;
-import org.brickred.socialauth.util.SocialAuthUtil;
 import org.brickred.socialauth.util.XMLParseUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -131,23 +128,6 @@ public class GoogleImpl extends AbstractProvider implements AuthProvider,
 		LOG.info("Redirection to following URL should happen : " + url);
 		return url;
 
-	}
-
-	/**
-	 * Verifies the user when the external provider redirects back to our
-	 * application.
-	 * 
-	 * @return Profile object containing the profile information
-	 * @param request
-	 *            Request object the request is received from the provider
-	 * @throws Exception
-	 */
-	@Override
-	public Profile verifyResponse(final HttpServletRequest request)
-			throws Exception {
-		Map<String, String> params = SocialAuthUtil
-				.getRequestParametersMap(request);
-		return doVerifyResponse(params);
 	}
 
 	/**

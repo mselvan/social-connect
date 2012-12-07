@@ -28,8 +28,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.brickred.socialauth.util.AccessGrant;
 import org.brickred.socialauth.util.Response;
 
@@ -73,18 +71,6 @@ public interface AuthProvider {
 	 * @throws Exception
 	 */
 	public String getLoginRedirectURL(String successUrl) throws Exception;
-
-	/**
-	 * Verifies the user when the external provider redirects back to our
-	 * application.
-	 * 
-	 * @return Profile object containing the profile information
-	 * @param request
-	 *            Request object the request is received from the provider
-	 * @throws Exception
-	 */
-	@Deprecated
-	public Profile verifyResponse(HttpServletRequest request) throws Exception;
 
 	/**
 	 * Verifies the user when the external provider redirects back to our

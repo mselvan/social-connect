@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
@@ -165,86 +163,6 @@ public class OpenIdImpl extends AbstractProvider implements AuthProvider,
 			return authReq.getDestinationUrl(true);
 		} catch (OpenIDException e) {
 			e.printStackTrace();
-		}
-
-		return null;
-	}
-
-	/**
-	 * Verifies the user when the external provider redirects back to our
-	 * application.
-	 * 
-	 * @param httpReq
-	 *            Request object the request is received from the provider
-	 * @return Profile object containing the profile information
-	 * 
-	 * @throws Exception
-	 */
-
-	@Override
-	public Profile verifyResponse(final HttpServletRequest httpReq)
-			throws Exception {
-		if (!isProviderState()) {
-			throw new ProviderStateException();
-		}
-		try {
-			// extract the parameters from the authentication response
-			// (which comes in as a HTTP request from the OpenID provider)
-			ParameterList response = new ParameterList(
-					httpReq.getParameterMap());
-
-			// extract the receiving URL from the HTTP request
-			StringBuffer receivingURL = httpReq.getRequestURL();
-			String queryString = httpReq.getQueryString();
-			if (queryString != null && queryString.length() > 0) {
-				receivingURL.append("?").append(httpReq.getQueryString());
-			}
-
-			// verify the response; ConsumerManager needs to be the same
-			// (static) instance used to place the authentication request
-			VerificationResult verification = manager.verify(
-					receivingURL.toString(), response, discovered);
-
-			// examine the verification result and extract the verified
-			// identifier
-			Identifier verified = verification.getVerifiedId();
-			if (verified != null) {
-				LOG.debug("Verified Id : " + verified.getIdentifier());
-				Profile p = new Profile();
-				p.setValidatedId(verified.getIdentifier());
-				AuthSuccess authSuccess = (AuthSuccess) verification
-						.getAuthResponse();
-
-				if (authSuccess.hasExtension(AxMessage.OPENID_NS_AX)) {
-					FetchResponse fetchResp = (FetchResponse) authSuccess
-							.getExtension(AxMessage.OPENID_NS_AX);
-
-					p.setEmail(fetchResp.getAttributeValue("email"));
-					p.setFirstName(fetchResp.getAttributeValue("firstname"));
-					p.setLastName(fetchResp.getAttributeValue("lastname"));
-					p.setFullName(fetchResp.getAttributeValue("fullname"));
-
-					// also use the ax namespace for compatibility
-					if (p.getEmail() == null) {
-						p.setEmail(fetchResp.getAttributeValue("emailax"));
-					}
-					if (p.getFirstName() == null) {
-						p.setFirstName(fetchResp
-								.getAttributeValue("firstnameax"));
-					}
-					if (p.getLastName() == null) {
-						p.setLastName(fetchResp.getAttributeValue("lastnameax"));
-					}
-					if (p.getFullName() == null) {
-						p.setFullName(fetchResp.getAttributeValue("fullnameax"));
-					}
-
-				}
-				userProfile = p;
-				return p;
-			}
-		} catch (OpenIDException e) {
-			throw e;
 		}
 
 		return null;
