@@ -137,7 +137,16 @@ public class OAuth2 implements OAuthStrategyBase {
 		LOG.debug("URL for Access Token request : " + authURL);
 		Response response;
 		try {
-			response = HttpUtil.doHttpRequest(authURL, methodType, null, null);
+			if (MethodType.POST.toString().equals(methodType)) {
+				String[] strings = authURL.split("\\?");
+				if (strings.length > 1) {
+					response = HttpUtil.doHttpRequest(strings[0], methodType, strings[1], null);
+				} else {
+					response = HttpUtil.doHttpRequest(authURL, methodType, null, null);
+				}
+			} else {
+				response = HttpUtil.doHttpRequest(authURL, methodType, null, null);
+			}
 		} catch (Exception e) {
 			throw new SocialAuthException("Error in url : " + authURL, e);
 		}

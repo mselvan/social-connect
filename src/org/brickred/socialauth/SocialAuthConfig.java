@@ -80,8 +80,7 @@ public class SocialAuthConfig implements Serializable {
 				org.brickred.socialauth.provider.FacebookImpl.class);
 		providersImplMap.put(Constants.FOURSQUARE,
 				org.brickred.socialauth.provider.FourSquareImpl.class);
-		providersImplMap.put(Constants.GOOGLE,
-				org.brickred.socialauth.provider.GoogleImpl.class);
+		providersImplMap.put(Constants.GOOGLE, org.brickred.socialauth.provider.GoogleOAuth2Impl.class);
 		providersImplMap.put(Constants.HOTMAIL,
 				org.brickred.socialauth.provider.HotmailImpl.class);
 		providersImplMap.put(Constants.LINKEDIN,
