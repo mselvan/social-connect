@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<project name="social-connect" default="init">
+	<property name="basedir" value="." />
+	<property file="${basedir}/env.properties" />
+	<property name="javadoc" value="${basedir}/javadoc" />
+	<property name="dist" value="${basedir}/dist" />
+	<property name="src" value="${basedir}/src" />
+	<property name="bin" value="${basedir}/bin" />
+	<property name="lib" value="${basedir}/lib" />
+			
+	<path id="libraries">
+		<fileset dir="${lib}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	
+	<target name="clean">
+		<delete dir="${bin}" failonerror="true" />
+		<delete dir="${dist}" failonerror="true" />
+	</target>
+	
+	<target name="init" depends="clean,compile,doc"/>
+		
+	<target name="jar" depends="clean,compile">
+	    <mkdir dir="${dist}" />
+		<jar destfile="${dist}/social-connect-${social-connect.version}.jar" basedir="${bin}">
+			<include name="org/**" />
+		</jar>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${bin}" />
+		<javac destdir="${bin}" classpathref="libraries" debug="true">			
+			<src location="${src}" />
+		</javac>
+	</target>
+	
+	<target name="doc">
+		<javadoc destdir="${javadoc}" 
+			sourcepath="${src}"
+			packagenames="*"
+			windowtitle="Social Connect"
+			classpathref="libraries"/>
+	</target>
+</project>

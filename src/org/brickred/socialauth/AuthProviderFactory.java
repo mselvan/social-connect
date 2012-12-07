@@ -42,41 +42,31 @@ import org.brickred.socialauth.exception.SocialAuthException;
 import org.brickred.socialauth.util.OAuthConfig;
 
 /**
- * This is a factory which creates an instance of the requested provider based
- * on the string passed as id. Currently available providers are facebook,
- * foursquare, google, hotmail, linkedin,myspace, openid, twitter, yahoo . If
- * requested provider id is not matched, it returns the OpenId provider.
+ * This is a factory which creates an instance of the requested provider based on the string passed as id. Currently available providers are facebook, foursquare, google, hotmail,
+ * linkedin,myspace, openid, twitter, yahoo . If requested provider id is not matched, it returns the OpenId provider.
  * 
  * @author tarunn@brickred.com
  * 
  */
-public class AuthProviderFactory {
+public class AuthProviderFactory
+{
 
 	private static String propFileName = "oauth_consumer.properties";
-	private static Map<String, Class> providerMap;
+	private static Map<String, Class<?>> providerMap;
 	private static Map<String, String> domainMap;
 	private static final Log LOG = LogFactory.getLog(AuthProviderFactory.class);
 
 	static {
-		providerMap = new HashMap<String, Class>();
-		providerMap.put("facebook",
-				org.brickred.socialauth.provider.FacebookImpl.class);
-		providerMap.put("foursquare",
-				org.brickred.socialauth.provider.FourSquareImpl.class);
-		providerMap.put("google",
-				org.brickred.socialauth.provider.GoogleImpl.class);
-		providerMap.put("hotmail",
-				org.brickred.socialauth.provider.HotmailImpl.class);
-		providerMap.put("linkedin",
-				org.brickred.socialauth.provider.LinkedInImpl.class);
-		providerMap.put("myspace",
-				org.brickred.socialauth.provider.MySpaceImpl.class);
-		providerMap.put("openid",
-				org.brickred.socialauth.provider.OpenIdImpl.class);
-		providerMap.put("twitter",
-				org.brickred.socialauth.provider.TwitterImpl.class);
-		providerMap.put("yahoo",
-				org.brickred.socialauth.provider.YahooImpl.class);
+		providerMap = new HashMap<String, Class<?>>();
+		providerMap.put("facebook", org.brickred.socialauth.provider.FacebookImpl.class);
+		providerMap.put("foursquare", org.brickred.socialauth.provider.FourSquareImpl.class);
+		providerMap.put("google", org.brickred.socialauth.provider.GoogleImpl.class);
+		providerMap.put("hotmail", org.brickred.socialauth.provider.HotmailImpl.class);
+		providerMap.put("linkedin", org.brickred.socialauth.provider.LinkedInImpl.class);
+		providerMap.put("myspace", org.brickred.socialauth.provider.MySpaceImpl.class);
+		providerMap.put("openid", org.brickred.socialauth.provider.OpenIdImpl.class);
+		providerMap.put("twitter", org.brickred.socialauth.provider.TwitterImpl.class);
+		providerMap.put("yahoo", org.brickred.socialauth.provider.YahooImpl.class);
 
 		domainMap = new HashMap<String, String>();
 		domainMap.put("google", "www.google.com");
@@ -93,14 +83,13 @@ public class AuthProviderFactory {
 	 * It provides the instance of requested provider
 	 * 
 	 * @param id
-	 *            the id of requested provider. It can be facebook, foursquare,
-	 *            google, hotmail, linkedin,myspace, twitter, yahoo
+	 *            the id of requested provider. It can be facebook, foursquare, google, hotmail, linkedin,myspace, twitter, yahoo
 	 * 
-	 * @return AuthProvider the instance of requested provider based on given
-	 *         id. If id is a URL it returns the OpenId provider.
+	 * @return AuthProvider the instance of requested provider based on given id. If id is a URL it returns the OpenId provider.
 	 * @throws Exception
 	 */
-	public static AuthProvider getInstance(final String id) throws Exception {
+	public static AuthProvider getInstance(final String id) throws Exception
+	{
 		AuthProvider provider = getProvider(id, propFileName, null);
 		return provider;
 
@@ -109,16 +98,14 @@ public class AuthProviderFactory {
 	/**
 	 * 
 	 * @param id
-	 *            the id of requested provider. It can be facebook, foursquare,
-	 *            google, hotmail, linkedin,myspace, twitter, yahoo.
+	 *            the id of requested provider. It can be facebook, foursquare, google, hotmail, linkedin,myspace, twitter, yahoo.
 	 * @param propertiesFileName
 	 *            file name to read the properties
-	 * @return AuthProvider the instance of requested provider based on given
-	 *         id. If id is a URL it returns the OpenId provider.
+	 * @return AuthProvider the instance of requested provider based on given id. If id is a URL it returns the OpenId provider.
 	 * @throws Exception
 	 */
-	public static AuthProvider getInstance(final String id,
-			final String propertiesFileName) throws Exception {
+	public static AuthProvider getInstance(final String id, final String propertiesFileName) throws Exception
+	{
 		AuthProvider provider = getProvider(id, propertiesFileName, null);
 		return provider;
 
@@ -127,16 +114,14 @@ public class AuthProviderFactory {
 	/**
 	 * 
 	 * @param id
-	 *            the id of requested provider. It can be facebook, foursquare,
-	 *            google, hotmail, linkedin,myspace, twitter, yahoo.
+	 *            the id of requested provider. It can be facebook, foursquare, google, hotmail, linkedin,myspace, twitter, yahoo.
 	 * @param classLoader
 	 *            classloader to load the properties
-	 * @return AuthProvider the instance of requested provider based on given
-	 *         id. If id is a URL it returns the OpenId provider.
+	 * @return AuthProvider the instance of requested provider based on given id. If id is a URL it returns the OpenId provider.
 	 * @throws Exception
 	 */
-	public static AuthProvider getInstance(final String id,
-			final ClassLoader classLoader) throws Exception {
+	public static AuthProvider getInstance(final String id, final ClassLoader classLoader) throws Exception
+	{
 		AuthProvider provider = getProvider(id, propFileName, classLoader);
 		return provider;
 
@@ -145,19 +130,16 @@ public class AuthProviderFactory {
 	/**
 	 * 
 	 * @param id
-	 *            the id of requested provider. It can be facebook, foursquare,
-	 *            google, hotmail, linkedin,myspace, twitter, yahoo.
+	 *            the id of requested provider. It can be facebook, foursquare, google, hotmail, linkedin,myspace, twitter, yahoo.
 	 * @param propertiesFileName
 	 *            file name to read the properties
 	 * @param classLoader
 	 *            classloader to load the properties
-	 * @return AuthProvider the instance of requested provider based on given
-	 *         id. If id is a URL it returns the OpenId provider.
+	 * @return AuthProvider the instance of requested provider based on given id. If id is a URL it returns the OpenId provider.
 	 * @throws Exception
 	 */
-	public static AuthProvider getInstance(final String id,
-			final String propertiesFileName, final ClassLoader classLoader)
-			throws Exception {
+	public static AuthProvider getInstance(final String id, final String propertiesFileName, final ClassLoader classLoader) throws Exception
+	{
 		AuthProvider provider = getProvider(id, propertiesFileName, classLoader);
 		return provider;
 
@@ -166,31 +148,26 @@ public class AuthProviderFactory {
 	/**
 	 * 
 	 * @param id
-	 *            the id of requested provider. It can be facebook, foursquare,
-	 *            google, hotmail, linkedin,myspace, twitter, yahoo.
+	 *            the id of requested provider. It can be facebook, foursquare, google, hotmail, linkedin,myspace, twitter, yahoo.
 	 * @param properties
-	 *            properties containing key/secret for different providers and
-	 *            information of custom provider.
-	 * @return AuthProvider the instance of requested provider based on given
-	 *         id. If id is a URL it returns the OpenId provider.
+	 *            properties containing key/secret for different providers and information of custom provider.
+	 * @return AuthProvider the instance of requested provider based on given id. If id is a URL it returns the OpenId provider.
 	 * @throws Exception
 	 */
-	public static AuthProvider getInstance(final String id,
-			final Properties properties) throws Exception {
+	public static AuthProvider getInstance(final String id, final Properties properties) throws Exception
+	{
 		for (Object key : properties.keySet()) {
 			String str = key.toString();
 			if (str.startsWith("socialauth.")) {
 				String val = str.substring("socialauth.".length());
-				registerProvider(val,
-						Class.forName(properties.get(str).toString()));
+				registerProvider(val, Class.forName(properties.get(str).toString()));
 			}
 		}
 		return loadProvider(id, properties);
 	}
 
-	private static AuthProvider getProvider(final String id,
-			final String fileName, final ClassLoader classLoader)
-			throws Exception {
+	private static AuthProvider getProvider(final String id, final String fileName, final ClassLoader classLoader) throws Exception
+	{
 		Properties props = new Properties();
 		AuthProvider provider;
 		ClassLoader loader = null;
@@ -206,24 +183,21 @@ public class AuthProviderFactory {
 				String str = key.toString();
 				if (str.startsWith("socialauth.")) {
 					String val = str.substring("socialauth.".length());
-					registerProvider(val,
-							Class.forName(props.get(str).toString()));
+					registerProvider(val, Class.forName(props.get(str).toString()));
 				}
 			}
 		} catch (NullPointerException ne) {
-			throw new FileNotFoundException(fileName
-					+ " file is not found in your class path");
+			throw new FileNotFoundException(fileName + " file is not found in your class path");
 		} catch (IOException ie) {
-			throw new IOException("Could not load configuration from "
-					+ fileName);
+			throw new IOException("Could not load configuration from " + fileName);
 		}
 
 		provider = loadProvider(id, props);
 		return provider;
 	}
 
-	private static AuthProvider loadProvider(final String id,
-			final Properties props) throws Exception {
+	private static AuthProvider loadProvider(final String id, final Properties props) throws Exception
+	{
 		Class<?> obj = providerMap.get(id);
 		props.setProperty("id", id);
 		AuthProvider provider;
@@ -236,8 +210,7 @@ public class AuthProviderFactory {
 				conf = new OAuthConfig(null, null);
 				conf.setId(id);
 			} catch (MalformedURLException me) {
-				throw new SocialAuthException(id
-						+ " is not a provider or valid OpenId URL");
+				throw new SocialAuthException(id + " is not a provider or valid OpenId URL");
 			}
 		} else {
 			String key;
@@ -248,14 +221,12 @@ public class AuthProviderFactory {
 			}
 			String consumerKey = props.getProperty(key + ".consumer_key");
 			if (consumerKey == null) {
-				throw new IllegalStateException(key
-						+ ".consumer_key not found.");
+				throw new IllegalStateException(key + ".consumer_key not found.");
 			}
 
 			String consumerSecret = props.getProperty(key + ".consumer_secret");
 			if (consumerSecret == null) {
-				throw new IllegalStateException(key
-						+ ".consumer_secret not found.");
+				throw new IllegalStateException(key + ".consumer_secret not found.");
 			}
 			conf = new OAuthConfig(consumerKey, consumerSecret);
 			conf.setId(id);
@@ -265,8 +236,7 @@ public class AuthProviderFactory {
 			Constructor<?> cons = obj.getConstructor(OAuthConfig.class);
 			provider = (AuthProvider) cons.newInstance(conf);
 		} catch (NoSuchMethodException me) {
-			LOG.warn(obj.getName() + " does not implement a constructor "
-					+ obj.getName() + "(OAuthConfig providerConfig)");
+			LOG.warn(obj.getName() + " does not implement a constructor " + obj.getName() + "(OAuthConfig providerConfig)");
 			provider = (AuthProvider) obj.newInstance();
 		} catch (Exception e) {
 			throw new SocialAuthConfigurationException(e);
@@ -282,7 +252,8 @@ public class AuthProviderFactory {
 	 * @param clazz
 	 *            class name of the provider implementation.
 	 */
-	public static void registerProvider(final String pname, final Class clazz) {
+	public static void registerProvider(final String pname, final Class<?> clazz)
+	{
 		providerMap.put(pname, clazz);
 	}
 }
