@@ -19,12 +19,12 @@
 		<delete dir="${dist}" failonerror="true" />
 	</target>
 	
-	<target name="init" depends="clean,compile,doc"/>
+	<target name="dist" depends="jar,doc"/>
 		
 	<target name="jar" depends="clean,compile">
 	    <mkdir dir="${dist}" />
 		<jar destfile="${dist}/social-connect-${social-connect.version}.jar" basedir="${bin}">
-			<include name="org/**" />
+			<include name="com/**" />
 		</jar>
 	</target>
 
