@@ -24,7 +24,7 @@
 	<target name="jar" depends="clean,compile">
 	    <mkdir dir="${dist}" />
 		<jar destfile="${dist}/social-connect-${social-connect.version}.jar" basedir="${bin}">
-			<include name="com/**" />
+			<include name="*/**" />
 		</jar>
 	</target>
 
