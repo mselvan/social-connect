@@ -5,6 +5,7 @@
 .classpath
 .project
 .settings/
+javadoc/
 
 ## generic files to ignore
 *~
