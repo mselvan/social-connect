@@ -52,8 +52,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.brickred.socialauth.exception.SocialAuthException;
 
 
@@ -72,7 +72,7 @@ import org.brickred.socialauth.exception.SocialAuthException;
  */
 public class HttpUtil {
 
-	private static final Log LOG = LogFactory.getLog(HttpUtil.class);
+	private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
 	private static Proxy proxyObj = null;
 	private static int timeoutValue = 0;
 	static {
@@ -88,11 +88,11 @@ public class HttpUtil {
 		} catch (KeyManagementException e) {
 			e.printStackTrace();
 		} catch (NoClassDefFoundError e) {
-			LOG.warn("SSLContext is not supported by your applicaiton server."
+			logger.warn("SSLContext is not supported by your applicaiton server."
 					+ e.getMessage());
 			e.printStackTrace();
 		} catch (Exception e) {
-			LOG.warn("Error while createing SSLContext");
+			logger.warn("Error while createing SSLContext");
 			e.printStackTrace();
 		}
 	}
@@ -134,7 +134,7 @@ public class HttpUtil {
 
 			conn.setInstanceFollowRedirects(true);
 			if (timeoutValue > 0) {
-				LOG.debug("Setting connection timeout : " + timeoutValue);
+				logger.debug("Setting connection timeout : " + timeoutValue);
 				conn.setConnectTimeout(timeoutValue);
 			}
 			if (requestMethod != null) {
@@ -208,7 +208,7 @@ public class HttpUtil {
 
 			conn.setInstanceFollowRedirects(true);
 			if (timeoutValue > 0) {
-				LOG.debug("Setting connection timeout : " + timeoutValue);
+				logger.debug("Setting connection timeout : " + timeoutValue);
 				conn.setConnectTimeout(timeoutValue);
 			}
 			if (requestMethod != null) {
@@ -226,7 +226,7 @@ public class HttpUtil {
 				if (requestMethod != null
 						&& !MethodType.GET.toString().equals(requestMethod)
 						&& !MethodType.DELETE.toString().equals(requestMethod)) {
-					LOG.debug(requestMethod + " request");
+					logger.debug(requestMethod + " request");
 					String boundary = "----Socialauth-posting"
 							+ System.currentTimeMillis();
 					conn.setRequestProperty("Content-Type",
@@ -451,7 +451,7 @@ public class HttpUtil {
 			if (proxyPort < 0) {
 				proxyPort = 0;
 			}
-			LOG.debug("Setting proxy - Host : " + host + "   port : " + port);
+			logger.debug("Setting proxy - Host : " + host + "   port : " + port);
 			proxyObj = new Proxy(Type.HTTP, new InetSocketAddress(host, port));
 		}
 	}
@@ -470,7 +470,7 @@ public class HttpUtil {
 	public static void write(final DataOutputStream out, final String outStr)
 			throws IOException {
 		out.writeBytes(outStr);
-		LOG.debug(outStr);
+		logger.debug(outStr);
 	}
 
 }

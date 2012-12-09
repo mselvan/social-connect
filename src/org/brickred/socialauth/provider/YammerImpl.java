@@ -35,8 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -57,6 +55,8 @@ import org.brickred.socialauth.util.Response;
 import org.brickred.socialauth.util.SocialAuthUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class YammerImpl extends AbstractProvider implements AuthProvider,
@@ -68,7 +68,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 	private static final String PROFILE_URL = "https://www.yammer.com/api/v1/users/%1$s.json?access_token=%2$s";
 	private static final String CONTACTS_URL = "https://www.yammer.com/api/v1/users.json?sort_by=followers&access_token=%1$s";
 
-	private final Log LOG = LogFactory.getLog(YammerImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(YammerImpl.class);
 
 	private String accessToken;
 	private String successUrl;
@@ -118,7 +118,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 
 	@Override
 	public String getLoginRedirectURL(final String successUrl) throws Exception {
-		LOG.info("Determining URL for redirection");
+		logger.info("Determining URL for redirection");
 		setProviderState(true);
 		try {
 			this.successUrl = URLEncoder.encode(successUrl, Constants.ENCODING);
@@ -131,7 +131,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 		if (scopeStr != null) {
 			url += "&scope=" + scopeStr;
 		}
-		LOG.info("Redirection to following URL should happen : " + url);
+		logger.info("Redirection to following URL should happen : " + url);
 		return url;
 	}
 
@@ -159,7 +159,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 	 */
 	private Profile doVerifyResponse(final Map<String, String> requestParams)
 			throws Exception {
-		LOG.info("Retrieving Access Token in verify response function");
+		logger.info("Retrieving Access Token in verify response function");
 		if (requestParams.get("error") != null
 				&& "access_denied".equals(requestParams.get("error"))) {
 			throw new UserDeniedPermissionException();
@@ -173,12 +173,12 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 		}
 		String url = String.format(ACCESS_TOKEN_URL, config.get_consumerKey(),
 				config.get_consumerSecret(), code);
-		LOG.debug("Verification Code : " + code);
+		logger.debug("Verification Code : " + code);
 		StringBuilder strb = new StringBuilder();
 		strb.append("code=").append(code);
 		strb.append("&client_secret=").append(config.get_consumerSecret());
 
-		LOG.debug("Parameters for access token : " + strb.toString());
+		logger.debug("Parameters for access token : " + strb.toString());
 		Response response;
 		try {
 			response = HttpUtil.doHttpRequest(url, MethodType.GET.toString(),
@@ -203,7 +203,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 		JSONObject resp = new JSONObject(result);
 		JSONObject accessTokenObject = resp.getJSONObject("access_token");
 		accessToken = accessTokenObject.getString("token");
-		LOG.debug("Access Token : " + accessToken);
+		logger.debug("Access Token : " + accessToken);
 
 		if (accessToken != null) {
 			isVerify = true;
@@ -245,7 +245,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 		}
 		List<Contact> plist = new ArrayList<Contact>();
 		String contactURL = String.format(CONTACTS_URL, accessToken);
-		LOG.info("Fetching contacts from " + contactURL);
+		logger.info("Fetching contacts from " + contactURL);
 		String respStr;
 		try {
 			Response response = HttpUtil.doHttpRequest(contactURL,
@@ -256,7 +256,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 					+ contactURL, e);
 		}
 		try {
-			LOG.debug("User Contacts list in json : " + respStr);
+			logger.debug("User Contacts list in json : " + respStr);
 			JSONArray resp = new JSONArray(respStr);
 			for (int i = 0; i < resp.length(); i++) {
 				JSONObject obj = resp.getJSONObject(i);
@@ -293,7 +293,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 
 	@Override
 	public void updateStatus(final String msg) throws Exception {
-		LOG.info("Updating status : " + msg);
+		logger.info("Updating status : " + msg);
 		if (!isVerify || accessToken == null) {
 			throw new SocialAuthException(
 					"Please call verifyResponse function first to get Access Token and then update status");
@@ -360,7 +360,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 		try {
 			result = serviceResponse
 					.getResponseBodyAsString(Constants.ENCODING);
-			LOG.debug("User Profile :" + result);
+			logger.debug("User Profile :" + result);
 		} catch (Exception e) {
 			throw new SocialAuthException("Failed to read response from  "
 					+ profileURL, e);
@@ -424,7 +424,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void setPermission(final Permission p) {
-		LOG.debug("Permission requested : " + p.toString());
+		logger.debug("Permission requested : " + p.toString());
 		this.scope = p;
 	}
 
@@ -460,8 +460,8 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 		}
 		headerParam.put("Authorization", "Bearer " + accessToken);
 		Response serviceResponse;
-		LOG.debug("Calling URL : " + url);
-		LOG.debug("Header Params : " + headerParam.toString());
+		logger.debug("Calling URL : " + url);
+		logger.debug("Header Params : " + headerParam.toString());
 		try {
 			serviceResponse = HttpUtil.doHttpRequest(url, methodType, body,
 					headerParam);
@@ -471,7 +471,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 		}
 		if (serviceResponse.getStatus() != 200
 				&& serviceResponse.getStatus() != 201) {
-			LOG.debug("Return statuc for URL " + url + " is "
+			logger.debug("Return statuc for URL " + url + " is "
 					+ serviceResponse.getStatus());
 			throw new SocialAuthException("Error while making request to URL :"
 					+ url + "Status : " + serviceResponse.getStatus());
@@ -506,7 +506,7 @@ public class YammerImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.warn("WARNING: Not implemented for Yammer");
+		logger.warn("WARNING: Not implemented for Yammer");
 		throw new SocialAuthException(
 				"Update Status is not implemented for Yammer");
 	}

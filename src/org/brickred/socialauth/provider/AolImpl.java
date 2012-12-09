@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
 import org.brickred.socialauth.Permission;
@@ -46,6 +44,8 @@ import org.brickred.socialauth.Profile;
 import org.brickred.socialauth.util.AccessGrant;
 import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -67,7 +67,7 @@ public class AolImpl implements AuthProvider, Serializable {
 	private String token;
 	private String redirectUri;
 	private OAuthConfig config;
-	private final Log LOG = LogFactory.getLog(AolImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(AolImpl.class);
 
 	/**
 	 * Reads properties provided in the configuration file
@@ -127,7 +127,7 @@ public class AolImpl implements AuthProvider, Serializable {
 			while ((inputLine = in.readLine()) != null) {
 				responseBuf.append(inputLine);
 			}
-			LOG.debug(responseBuf.toString());
+			logger.debug(responseBuf.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -144,7 +144,7 @@ public class AolImpl implements AuthProvider, Serializable {
 
 	@Override
 	public void updateStatus(final String msg) {
-		LOG.warn("Update status not implemented");
+		logger.warn("Update status not implemented");
 	}
 
 	/**
@@ -163,7 +163,7 @@ public class AolImpl implements AuthProvider, Serializable {
 	 */
 	@Override
 	public void setPermission(final Permission p) {
-		LOG.debug("Permission requested : " + p.toString());
+		logger.debug("Permission requested : " + p.toString());
 	}
 
 	@Override
@@ -203,7 +203,7 @@ public class AolImpl implements AuthProvider, Serializable {
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.warn("Update status not implemented");
+		logger.warn("Update status not implemented");
 		return null;
 	}
 }

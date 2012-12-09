@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -56,6 +54,8 @@ import org.openid4java.message.ParameterList;
 import org.openid4java.message.ax.AxMessage;
 import org.openid4java.message.ax.FetchRequest;
 import org.openid4java.message.ax.FetchResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -67,7 +67,7 @@ public class OpenIdImpl extends AbstractProvider implements AuthProvider,
 		Serializable {
 
 	private static final long serialVersionUID = 7694191649303094756L;
-	private final Log LOG = LogFactory.getLog(OpenIdImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(OpenIdImpl.class);
 
 	private ConsumerManager manager;
 	private DiscoveryInformation discovered;
@@ -109,7 +109,7 @@ public class OpenIdImpl extends AbstractProvider implements AuthProvider,
 		setProviderState(true);
 		String url = authRequest(id, successUrl);
 		this.successUrl = successUrl;
-		LOG.info("Redirection to following URL should happen : " + url);
+		logger.info("Redirection to following URL should happen : " + url);
 		return url;
 	}
 
@@ -214,7 +214,7 @@ public class OpenIdImpl extends AbstractProvider implements AuthProvider,
 			// identifier
 			Identifier verified = verification.getVerifiedId();
 			if (verified != null) {
-				LOG.debug("Verified Id : " + verified.getIdentifier());
+				logger.debug("Verified Id : " + verified.getIdentifier());
 				Profile p = new Profile();
 				p.setValidatedId(verified.getIdentifier());
 				AuthSuccess authSuccess = (AuthSuccess) verification
@@ -260,7 +260,7 @@ public class OpenIdImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void updateStatus(final String msg) throws Exception {
-		LOG.warn("WARNING: Not implemented for OpenId");
+		logger.warn("WARNING: Not implemented for OpenId");
 		throw new SocialAuthException(
 				"Update Status is not implemented for OpenId");
 	}
@@ -272,7 +272,7 @@ public class OpenIdImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public List<Contact> getContactList() {
-		LOG.info("Contacts are not available in OpenId");
+		logger.info("Contacts are not available in OpenId");
 		return null;
 	}
 
@@ -292,7 +292,7 @@ public class OpenIdImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void setPermission(final Permission p) {
-		LOG.warn("Setting Permission for openid is not valid.");
+		logger.warn("Setting Permission for openid is not valid.");
 	}
 
 	/**
@@ -311,7 +311,7 @@ public class OpenIdImpl extends AbstractProvider implements AuthProvider,
 			final Map<String, String> params,
 			final Map<String, String> headerParams, final String body)
 			throws Exception {
-		LOG.warn("WARNING: API method is not implemented for OpenId");
+		logger.warn("WARNING: API method is not implemented for OpenId");
 		throw new SocialAuthException(
 				"API method is not implemented for OpenId");
 	}
@@ -339,7 +339,7 @@ public class OpenIdImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.warn("WARNING: Not implemented for OpenId");
+		logger.warn("WARNING: Not implemented for OpenId");
 		throw new SocialAuthException(
 				"Update Status is not implemented for OpenId");
 	}

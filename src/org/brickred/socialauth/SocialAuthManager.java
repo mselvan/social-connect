@@ -32,13 +32,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.exception.SocialAuthConfigurationException;
 import org.brickred.socialauth.exception.SocialAuthException;
 import org.brickred.socialauth.exception.SocialAuthManagerStateException;
 import org.brickred.socialauth.util.AccessGrant;
 import org.brickred.socialauth.util.OAuthConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -51,7 +51,7 @@ import org.brickred.socialauth.util.OAuthConfig;
 public class SocialAuthManager implements Serializable {
 
 	private static final long serialVersionUID = 1620459182486095613L;
-	private final Log LOG = LogFactory.getLog(SocialAuthManager.class);
+	private final Logger logger = LoggerFactory.getLogger(SocialAuthManager.class);
 	private AuthProvider authProvider;
 	private String providerId;
 	private String currentProviderId;
@@ -83,7 +83,7 @@ public class SocialAuthManager implements Serializable {
 	 */
 	public void setSocialAuthConfig(final SocialAuthConfig socialAuthConfig)
 			throws Exception {
-		LOG.debug("Setting socialauth config");
+		logger.debug("Setting socialauth config");
 		if (socialAuthConfig == null) {
 			throw new SocialAuthConfigurationException(
 					"SocialAuthConfig is null");
@@ -111,7 +111,7 @@ public class SocialAuthManager implements Serializable {
 	 */
 	public String getAuthenticationUrl(final String id, final String successUrl)
 			throws Exception {
-		LOG.debug("Getting Authentication URL for provider " + id
+		logger.debug("Getting Authentication URL for provider " + id
 				+ ", with success url : " + successUrl);
 		return getAuthURL(id, successUrl, null);
 	}
@@ -135,7 +135,7 @@ public class SocialAuthManager implements Serializable {
 	public String getAuthenticationUrl(final String id,
 			final String successUrl, final Permission permission)
 			throws Exception {
-		LOG.debug("Getting Authentication URL for provider " + id
+		logger.debug("Getting Authentication URL for provider " + id
 				+ ", with success url : " + successUrl);
 		return getAuthURL(id, successUrl, permission);
 	}
@@ -179,7 +179,7 @@ public class SocialAuthManager implements Serializable {
 		if (providerId == null || authProvider == null) {
 			throw new SocialAuthManagerStateException();
 		}
-		LOG.info("Connecting provider : " + providerId);
+		logger.info("Connecting provider : " + providerId);
 		if (providersMap.get(providerId) == null) {
 			authProvider.verifyResponse(requestParams);
 			providersMap.put(providerId, authProvider);
@@ -219,7 +219,7 @@ public class SocialAuthManager implements Serializable {
 		if (accessGrant.getProviderId() == null || accessGrant.getKey() == null) {
 			throw new SocialAuthException("access grant is not valid");
 		}
-		LOG.debug("Connecting provider : " + accessGrant.getProviderId()
+		logger.debug("Connecting provider : " + accessGrant.getProviderId()
 				+ ", from given access grant");
 		AuthProvider provider = getProviderInstance(accessGrant.getProviderId());
 		provider.setAccessGrant(accessGrant);
@@ -262,7 +262,7 @@ public class SocialAuthManager implements Serializable {
 			Constructor<?> cons = obj.getConstructor(OAuthConfig.class);
 			provider = (AuthProvider) cons.newInstance(config);
 		} catch (NoSuchMethodException me) {
-			LOG.warn(obj.getName() + " does not implement a constructor "
+			logger.warn(obj.getName() + " does not implement a constructor "
 					+ obj.getName() + "(Poperties props)");
 			provider = (AuthProvider) obj.newInstance();
 		} catch (Exception e) {

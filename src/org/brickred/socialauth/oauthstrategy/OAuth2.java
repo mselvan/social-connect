@@ -33,8 +33,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.Permission;
 import org.brickred.socialauth.exception.ProviderStateException;
 import org.brickred.socialauth.exception.SocialAuthException;
@@ -47,12 +45,14 @@ import org.brickred.socialauth.util.OAuthConsumer;
 import org.brickred.socialauth.util.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class OAuth2 implements OAuthStrategyBase {
 
 	private static final long serialVersionUID = -8431902665718727947L;
-	private final Log LOG = LogFactory.getLog(OAuth2.class);
+	private final Logger logger = LoggerFactory.getLogger(OAuth2.class);
 	private AccessGrant accessGrant;
 	private OAuthConsumer oauth;
 	private boolean providerState;
@@ -73,7 +73,7 @@ public class OAuth2 implements OAuthStrategyBase {
 
 	@Override
 	public String getLoginRedirectURL(final String successUrl) throws Exception {
-		LOG.info("Determining URL for redirection");
+		logger.info("Determining URL for redirection");
 		providerState = true;
 		try {
 			this.successUrl = URLEncoder.encode(successUrl, Constants.ENCODING);
@@ -93,7 +93,7 @@ public class OAuth2 implements OAuthStrategyBase {
 		}
 		String url = sb.toString();
 
-		LOG.info("Redirection to following URL should happen : " + url);
+		logger.info("Redirection to following URL should happen : " + url);
 		return url;
 	}
 
@@ -106,7 +106,7 @@ public class OAuth2 implements OAuthStrategyBase {
 	@Override
 	public AccessGrant verifyResponse(final Map<String, String> requestParams,
 			final String methodType) throws Exception {
-		LOG.info("Verifying the authentication response from provider");
+		logger.info("Verifying the authentication response from provider");
 		if (!providerState) {
 			throw new ProviderStateException();
 		}
@@ -114,7 +114,7 @@ public class OAuth2 implements OAuthStrategyBase {
 		if (code == null || code.length() == 0) {
 			throw new SocialAuthException("Verification code is null");
 		}
-		LOG.debug("Verification Code : " + code);
+		logger.debug("Verification Code : " + code);
 		String acode;
 		String accessToken = null;
 		try {
@@ -135,7 +135,7 @@ public class OAuth2 implements OAuthStrategyBase {
 		sb.append("&grant_type=authorization_code");
 
 		String authURL = sb.toString();
-		LOG.debug("URL for Access Token request : " + authURL);
+		logger.debug("URL for Access Token request : " + authURL);
 		Response response;
 		try {
 			if (MethodType.POST.toString().equals(methodType)) {
@@ -203,8 +203,8 @@ public class OAuth2 implements OAuthStrategyBase {
 						+ authURL);
 			}
 		}
-		LOG.debug("Access Token : " + accessToken);
-		LOG.debug("Expires : " + expires);
+		logger.debug("Access Token : " + accessToken);
+		logger.debug("Expires : " + expires);
 		if (accessToken != null) {
 			accessGrant = new AccessGrant();
 			accessGrant.setKey(accessToken);
@@ -244,7 +244,7 @@ public class OAuth2 implements OAuthStrategyBase {
 		char separator = url.indexOf('?') == -1 ? '?' : '&';
 		String urlStr = url + separator + accessTokenParameterName + "="
 				+ accessGrant.getKey();
-		LOG.debug("Calling URL : " + urlStr);
+		logger.debug("Calling URL : " + urlStr);
 		return HttpUtil.doHttpRequest(urlStr, MethodType.GET.toString(), null,
 				null);
 	}
@@ -291,9 +291,9 @@ public class OAuth2 implements OAuthStrategyBase {
 
 			}
 		}
-		LOG.debug("Calling URL	:	" + reqURL);
-		LOG.debug("Body		:	" + bodyStr);
-		LOG.debug("Header Params	:	" + headerParams);
+		logger.debug("Calling URL	:	" + reqURL);
+		logger.debug("Body		:	" + bodyStr);
+		logger.debug("Header Params	:	" + headerParams);
 		return HttpUtil
 				.doHttpRequest(reqURL, methodType, bodyStr, headerParams);
 	}

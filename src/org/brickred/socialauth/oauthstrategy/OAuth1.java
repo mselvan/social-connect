@@ -28,8 +28,6 @@ package org.brickred.socialauth.oauthstrategy;
 import java.io.InputStream;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.Permission;
 import org.brickred.socialauth.exception.ProviderStateException;
 import org.brickred.socialauth.exception.SocialAuthException;
@@ -39,12 +37,14 @@ import org.brickred.socialauth.util.MethodType;
 import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.OAuthConsumer;
 import org.brickred.socialauth.util.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-
-public class OAuth1 implements OAuthStrategyBase {
+public class OAuth1 implements OAuthStrategyBase
+{
 
 	private static final long serialVersionUID = -447820298609650347L;
-	private final Log LOG = LogFactory.getLog(OAuth1.class);
+	private final Logger logger = LoggerFactory.getLogger(OAuth1.class);
 
 	private AccessGrant accessToken;
 	private AccessGrant requestToken;
@@ -55,7 +55,8 @@ public class OAuth1 implements OAuthStrategyBase {
 	private Permission permission;
 	private String providerId;
 
-	public OAuth1(final OAuthConfig config, final Map<String, String> endpoints) {
+	public OAuth1(final OAuthConfig config, final Map<String, String> endpoints)
+	{
 		oauth = new OAuthConsumer(config);
 		this.endpoints = endpoints;
 		permission = Permission.ALL;
@@ -63,27 +64,26 @@ public class OAuth1 implements OAuthStrategyBase {
 	}
 
 	@Override
-	public String getLoginRedirectURL(final String successUrl) throws Exception {
-		LOG.info("Determining URL for redirection");
+	public String getLoginRedirectURL(final String successUrl) throws Exception
+	{
+		logger.info("Determining URL for redirection");
 		providerState = true;
-		LOG.debug("Call to fetch Request Token");
-		requestToken = oauth.getRequestToken(
-				endpoints.get(Constants.OAUTH_REQUEST_TOKEN_URL), successUrl);
-		String authUrl = endpoints.get(Constants.OAUTH_AUTHORIZATION_URL);
+		logger.debug("Call to fetch Request Token");
+		String reqUrl = endpoints.get(Constants.OAUTH_REQUEST_TOKEN_URL);
 		if (scope != null) {
-			authUrl += scope;
+			reqUrl += scope;
 		}
-		StringBuilder urlBuffer = oauth.buildAuthUrl(authUrl, requestToken,
-				successUrl);
-		LOG.info("Redirection to following URL should happen : "
-				+ urlBuffer.toString());
+		requestToken = oauth.getRequestToken(reqUrl, successUrl);
+		String authUrl = endpoints.get(Constants.OAUTH_AUTHORIZATION_URL);
+		StringBuilder urlBuffer = oauth.buildAuthUrl(authUrl, requestToken, successUrl);
+		logger.info("Redirection to following URL should happen : " + urlBuffer.toString());
 		return urlBuffer.toString();
 	}
 
 	@Override
-	public AccessGrant verifyResponse(final Map<String, String> requestParams,
-			final String methodType) throws Exception {
-		LOG.info("Verifying the authentication response from provider");
+	public AccessGrant verifyResponse(final Map<String, String> requestParams, final String methodType) throws Exception
+	{
+		logger.info("Verifying the authentication response from provider");
 		if (!providerState) {
 			throw new ProviderStateException();
 		}
@@ -94,98 +94,90 @@ public class OAuth1 implements OAuthStrategyBase {
 		if (verifier != null) {
 			requestToken.setAttribute(Constants.OAUTH_VERIFIER, verifier);
 		}
-		LOG.debug("Call to fetch Access Token");
-		accessToken = oauth.getAccessToken(
-				endpoints.get(Constants.OAUTH_ACCESS_TOKEN_URL), requestToken);
+		logger.debug("Call to fetch Access Token");
+		accessToken = oauth.getAccessToken(endpoints.get(Constants.OAUTH_ACCESS_TOKEN_URL), requestToken);
 		accessToken.setPermission(permission);
 		accessToken.setProviderId(providerId);
 		return accessToken;
 	}
 
 	@Override
-	public AccessGrant verifyResponse(final Map<String, String> requestParams)
-			throws Exception {
+	public AccessGrant verifyResponse(final Map<String, String> requestParams) throws Exception
+	{
 		return verifyResponse(requestParams, MethodType.GET.toString());
 	}
 
 	@Override
-	public void setScope(final String scope) {
+	public void setScope(final String scope)
+	{
 		this.scope = scope;
 	}
 
 	@Override
-	public void setPermission(final Permission permission) {
+	public void setPermission(final Permission permission)
+	{
 		this.permission = permission;
 	}
 
 	@Override
-	public Response executeFeed(final String url) throws Exception {
+	public Response executeFeed(final String url) throws Exception
+	{
 		return oauth.httpGet(url, null, accessToken);
 	}
 
 	@Override
-	public Response executeFeed(final String urlStr, final String methodType,
-			final Map<String, String> params,
-			final Map<String, String> headerParams, final String body)
-			throws Exception {
+	public Response executeFeed(final String urlStr, final String methodType, final Map<String, String> params, final Map<String, String> headerParams, final String body) throws Exception
+	{
 		Response response = null;
 		if (accessToken == null) {
-			throw new SocialAuthException(
-					"Please call verifyResponse function first to get Access Token");
+			throw new SocialAuthException("Please call verifyResponse function first to get Access Token");
 		}
 		if (MethodType.GET.toString().equals(methodType)) {
 			try {
 				response = oauth.httpGet(urlStr, headerParams, accessToken);
 			} catch (Exception ie) {
-				throw new SocialAuthException(
-						"Error while making request to URL : " + urlStr, ie);
+				throw new SocialAuthException("Error while making request to URL : " + urlStr, ie);
 			}
 		} else if (MethodType.PUT.toString().equals(methodType)) {
 			try {
-				response = oauth.httpPut(urlStr, params, headerParams, body,
-						accessToken);
+				response = oauth.httpPut(urlStr, params, headerParams, body, accessToken);
 			} catch (Exception e) {
-				throw new SocialAuthException(
-						"Error while making request to URL : " + urlStr, e);
+				throw new SocialAuthException("Error while making request to URL : " + urlStr, e);
 			}
 		} else if (MethodType.POST.toString().equals(methodType)) {
 			try {
-				response = oauth.httpPost(urlStr, params, headerParams, body,
-						accessToken);
+				response = oauth.httpPost(urlStr, params, headerParams, body, accessToken);
 			} catch (Exception e) {
-				throw new SocialAuthException(
-						"Error while making request to URL : " + urlStr, e);
+				throw new SocialAuthException("Error while making request to URL : " + urlStr, e);
 			}
 		}
 		return response;
 	}
 
 	@Override
-	public void setAccessGrant(final AccessGrant accessGrant) {
+	public void setAccessGrant(final AccessGrant accessGrant)
+	{
 		this.accessToken = accessGrant;
 	}
 
 	@Override
-	public void setAccessTokenParameterName(
-			final String accessTokenParameterName) {
-		LOG.warn("It is not implemented for OAuth1");
+	public void setAccessTokenParameterName(final String accessTokenParameterName)
+	{
+		logger.warn("It is not implemented for OAuth1");
 
 	}
 
 	@Override
-	public void logout() {
+	public void logout()
+	{
 		accessToken = null;
 		providerState = false;
 	}
 
 	@Override
-	public Response uploadImage(final String url, final String methodType,
-			final Map<String, String> params,
-			final Map<String, String> headerParams, final String fileName,
-			final InputStream inputStream, final String fileParamName)
-			throws Exception {
-		return oauth.uploadImage(url, params, headerParams, inputStream,
-				fileParamName, fileName, methodType, accessToken, true);
+	public Response uploadImage(final String url, final String methodType, final Map<String, String> params, final Map<String, String> headerParams, final String fileName, final InputStream inputStream, final String fileParamName) throws Exception
+	{
+		return oauth.uploadImage(url, params, headerParams, inputStream, fileParamName, fileName, methodType, accessToken, true);
 	}
 
 }

@@ -9,7 +9,7 @@ package org.brickred.socialauth.util;
  * </p>
  * 
  * <p>
- * Change Log:
+ * Change Logger:
  * </p>
  * <ul>
  * <li>v2.2.1 - Fixed bug using URL_SAFE and ORDERED encodings. Fixed bug when

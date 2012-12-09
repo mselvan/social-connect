@@ -27,8 +27,8 @@ package org.brickred.socialauth.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.brickred.socialauth.Profile;
 
 
@@ -39,7 +39,7 @@ import org.brickred.socialauth.Profile;
  */
 public class OpenIdConsumer {
 
-	private static final Log LOG = LogFactory.getLog(OpenIdConsumer.class);
+	private static final Logger logger = LoggerFactory.getLogger(OpenIdConsumer.class);
 	private static Map<String, String> associationMap;
 	private static Map<String, String> requestTokenMap;
 	public static final String OPENID_REQUEST_TOKEN = "openid.ext2.request_token";
@@ -127,7 +127,7 @@ public class OpenIdConsumer {
 		String paramStr = HttpUtil.buildParams(params);
 		char separator = requestTokenUrl.indexOf('?') == -1 ? '?' : '&';
 		String url = requestTokenUrl + separator + paramStr;
-		LOG.debug("Request Token URL : " + url);
+		logger.debug("Request Token URL : " + url);
 		return url;
 	}
 

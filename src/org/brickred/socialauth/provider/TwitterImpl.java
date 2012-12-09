@@ -34,8 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -53,6 +51,8 @@ import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -75,7 +75,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 	private static final Map<String, String> ENDPOINTS;
 	private static final Pattern IMAGE_FILE_PATTERN = Pattern.compile(
 			"(jpg|jpeg|gif|png)$", Pattern.CASE_INSENSITIVE);
-	private final Log LOG = LogFactory.getLog(TwitterImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(TwitterImpl.class);
 
 	private Permission scope;
 	private boolean isVerify;
@@ -130,7 +130,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public String getLoginRedirectURL(final String successUrl) throws Exception {
-		LOG.info("Determining URL for redirection");
+		logger.info("Determining URL for redirection");
 		return authenticationStrategy.getLoginRedirectURL(successUrl);
 	}
 
@@ -152,7 +152,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 
 	private Profile doVerifyResponse(final Map<String, String> requestParams)
 			throws Exception {
-		LOG.info("Verifying the authentication response from provider");
+		logger.info("Verifying the authentication response from provider");
 		if (requestParams.get("denied") != null) {
 			throw new UserDeniedPermissionException();
 		}
@@ -164,7 +164,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 	private Profile getProfile() throws Exception {
 		Profile profile = new Profile();
 		String url = PROFILE_URL + accessToken.getAttribute("screen_name");
-		LOG.debug("Obtaining user profile. Profile URL : " + url);
+		logger.debug("Obtaining user profile. Profile URL : " + url);
 		Response serviceResponse = null;
 		try {
 			serviceResponse = authenticationStrategy.executeFeed(url);
@@ -181,7 +181,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 		try {
 			result = serviceResponse
 					.getResponseBodyAsString(Constants.ENCODING);
-			LOG.debug("User Profile :" + result);
+			logger.debug("User Profile :" + result);
 		} catch (Exception exc) {
 			throw new SocialAuthException("Failed to read response from  "
 					+ url, exc);
@@ -225,7 +225,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void updateStatus(final String msg) throws Exception {
-		LOG.info("Updatting status " + msg);
+		logger.info("Updatting status " + msg);
 		if (!isVerify) {
 			throw new SocialAuthException(
 					"Please call verifyResponse function first to get Access Token");
@@ -264,7 +264,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 		String url = String.format(CONTACTS_URL,
 				accessToken.getAttribute("screen_name"));
 		List<Contact> plist = new ArrayList<Contact>();
-		LOG.info("Fetching contacts from " + url);
+		logger.info("Fetching contacts from " + url);
 		Response serviceResponse = null;
 		try {
 			serviceResponse = authenticationStrategy.executeFeed(url);
@@ -279,7 +279,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 		} catch (Exception e) {
 			throw new ServerDataException("Failed to get response from " + url);
 		}
-		LOG.debug("User friends ids : " + result);
+		logger.debug("User friends ids : " + result);
 		try {
 			JSONObject jobj = new JSONObject(result);
 			if (jobj.has("ids")) {
@@ -329,7 +329,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 			strb.append(value);
 		}
 		String url = LOOKUP_URL + strb.toString();
-		LOG.debug("Fetching info of following users : " + url);
+		logger.debug("Fetching info of following users : " + url);
 		Response serviceResponse = null;
 		try {
 			serviceResponse = authenticationStrategy.executeFeed(url);
@@ -345,7 +345,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 			throw new ServerDataException("Failed to get response from " + url,
 					e);
 		}
-		LOG.debug("Users info : " + result);
+		logger.debug("Users info : " + result);
 		try {
 			JSONArray jarr = new JSONArray(result);
 			for (int i = 0; i < jarr.length(); i++) {
@@ -387,7 +387,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void setPermission(final Permission p) {
-		LOG.debug("Permission requested : " + p.toString());
+		logger.debug("Permission requested : " + p.toString());
 		this.scope = p;
 	}
 
@@ -419,7 +419,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 					"Please call verifyResponse function first to get Access Token");
 		}
 		Response response = null;
-		LOG.debug("Calling URL : " + url);
+		logger.debug("Calling URL : " + url);
 		response = authenticationStrategy.executeFeed(url, methodType, params,
 				headerParams, body);
 		return response;
@@ -464,7 +464,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.info("Uploading Image :: " + fileName + ", message :: " + message);
+		logger.info("Uploading Image :: " + fileName + ", message :: " + message);
 		if (!IMAGE_FILE_PATTERN.matcher(fileName).find()) {
 			throw new SocialAuthException(
 					"Twitter supports only PNG, JPG and GIF image formats");
@@ -475,7 +475,7 @@ public class TwitterImpl extends AbstractProvider implements AuthProvider,
 		Response response = authenticationStrategy.uploadImage(
 				IMAGE_UPLOAD_URL, MethodType.POST.toString(), map, null,
 				fileName, inputStream, fileNameParam);
-		LOG.info("Upload Image status::" + response.getStatus());
+		logger.info("Upload Image status::" + response.getStatus());
 		return response;
 	}
 }

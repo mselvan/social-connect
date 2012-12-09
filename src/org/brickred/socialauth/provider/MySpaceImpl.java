@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -51,6 +49,8 @@ import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -65,7 +65,7 @@ public class MySpaceImpl extends AbstractProvider implements AuthProvider,
 	private static final String CONTACTS_URL = "http://api.myspace.com/1.0/people/@me/@all";
 	private static final String UPDATE_STATUS_URL = "http://api.myspace.com/1.0/statusmood/@me/@self";
 	private static final Map<String, String> ENDPOINTS;
-	private final Log LOG = LogFactory.getLog(MySpaceImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(MySpaceImpl.class);
 
 	private Permission scope;
 	private AccessGrant accessToken;
@@ -151,7 +151,7 @@ public class MySpaceImpl extends AbstractProvider implements AuthProvider,
 
 	private Profile doVerifyResponse(final Map<String, String> requestParams)
 			throws Exception {
-		LOG.info("Verifying the authentication response from provider");
+		logger.info("Verifying the authentication response from provider");
 		if (requestParams.get("oauth_problem") != null
 				&& "user_refused".equals(requestParams.get("oauth_problem"))) {
 			throw new UserDeniedPermissionException();
@@ -173,7 +173,7 @@ public class MySpaceImpl extends AbstractProvider implements AuthProvider,
 			throw new SocialAuthException(
 					"Please call verifyResponse function first to get Access Token");
 		}
-		LOG.info("Fetching contacts from " + CONTACTS_URL);
+		logger.info("Fetching contacts from " + CONTACTS_URL);
 
 		Response serviceResponse = null;
 		try {
@@ -186,7 +186,7 @@ public class MySpaceImpl extends AbstractProvider implements AuthProvider,
 		try {
 			result = serviceResponse
 					.getResponseBodyAsString(Constants.ENCODING);
-			LOG.debug("Contacts JSON :" + result);
+			logger.debug("Contacts JSON :" + result);
 		} catch (Exception exc) {
 			throw new SocialAuthException("Failed to read contacts from  "
 					+ CONTACTS_URL, exc);
@@ -243,7 +243,7 @@ public class MySpaceImpl extends AbstractProvider implements AuthProvider,
 		if (msg == null || msg.trim().length() == 0) {
 			throw new ServerDataException("Status cannot be blank");
 		}
-		LOG.info("Updating status " + msg + " on " + UPDATE_STATUS_URL);
+		logger.info("Updating status " + msg + " on " + UPDATE_STATUS_URL);
 		String msgBody = "{\"status\":\"" + msg + "\"}";
 		Response serviceResponse = null;
 		try {
@@ -254,7 +254,7 @@ public class MySpaceImpl extends AbstractProvider implements AuthProvider,
 			throw new SocialAuthException("Failed to update status on "
 					+ UPDATE_STATUS_URL, ie);
 		}
-		LOG.info("Update Status Response :" + serviceResponse.getStatus());
+		logger.info("Update Status Response :" + serviceResponse.getStatus());
 
 	}
 
@@ -275,14 +275,14 @@ public class MySpaceImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void setPermission(final Permission p) {
-		LOG.debug("Permission requested : " + p.toString());
+		logger.debug("Permission requested : " + p.toString());
 		this.scope = p;
 		authenticationStrategy.setPermission(scope);
 		authenticationStrategy.setScope(getScope());
 	}
 
 	private Profile getProfile() throws Exception {
-		LOG.debug("Obtaining user profile");
+		logger.debug("Obtaining user profile");
 		Profile profile = new Profile();
 
 		Response serviceResponse = null;
@@ -303,7 +303,7 @@ public class MySpaceImpl extends AbstractProvider implements AuthProvider,
 		try {
 			result = serviceResponse
 					.getResponseBodyAsString(Constants.ENCODING);
-			LOG.debug("User Profile :" + result);
+			logger.debug("User Profile :" + result);
 		} catch (Exception exc) {
 			throw new SocialAuthException("Failed to read response from  "
 					+ PROFILE_URL, exc);
@@ -402,7 +402,7 @@ public class MySpaceImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.warn("WARNING: Not implemented for MySpace");
+		logger.warn("WARNING: Not implemented for MySpace");
 		throw new SocialAuthException(
 				"Update Status is not implemented for MySpace");
 	}

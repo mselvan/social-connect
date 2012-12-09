@@ -31,8 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -50,6 +48,8 @@ import org.brickred.socialauth.util.MethodType;
 import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.Response;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -64,7 +64,7 @@ public class GoogleOAuth2Impl extends AbstractProvider implements AuthProvider, 
 	private static final long serialVersionUID = 8644510564735754296L;
 	private static final String PROFILE_URL = "https://www.googleapis.com/oauth2/v1/userinfo";
 	private static final Map<String, String> ENDPOINTS;
-	private static final Log LOG = LogFactory.getLog(GoogleOAuth2Impl.class);
+	private static final Logger logger = LoggerFactory.getLogger(GoogleOAuth2Impl.class);
 
 	private Permission scope;
 	private OAuthConfig config;
@@ -144,14 +144,14 @@ public class GoogleOAuth2Impl extends AbstractProvider implements AuthProvider, 
 
 	private Profile doVerifyResponse(final Map<String, String> requestParams) throws Exception
 	{
-		LOG.info("Retrieving Access Token in verify response function");
+		logger.info("Retrieving Access Token in verify response function");
 		if (requestParams.get("error_reason") != null && "user_denied".equals(requestParams.get("error_reason"))) {
 			throw new UserDeniedPermissionException();
 		}
 		accessGrant = authenticationStrategy.verifyResponse(requestParams, MethodType.POST.toString());
 
 		if (accessGrant != null) {
-			LOG.debug("Obtaining user profile");
+			logger.debug("Obtaining user profile");
 			return authGoogleLogin();
 		} else {
 			throw new SocialAuthException("Access token not found");
@@ -169,7 +169,7 @@ public class GoogleOAuth2Impl extends AbstractProvider implements AuthProvider, 
 			throw new SocialAuthException("Error while getting profile from " + PROFILE_URL, e);
 		}
 		try {
-			LOG.debug("User Profile : " + presp);
+			logger.debug("User Profile : " + presp);
 			JSONObject resp = new JSONObject(presp);
 			Profile p = new Profile();
 			p.setValidatedId(resp.getString("id"));
@@ -261,7 +261,7 @@ public class GoogleOAuth2Impl extends AbstractProvider implements AuthProvider, 
 	@Override
 	public void setPermission(final Permission p)
 	{
-		LOG.debug("Permission requested : " + p.toString());
+		logger.debug("Permission requested : " + p.toString());
 		this.scope = p;
 		authenticationStrategy.setPermission(this.scope);
 		authenticationStrategy.setScope(getScope());
@@ -286,7 +286,7 @@ public class GoogleOAuth2Impl extends AbstractProvider implements AuthProvider, 
 	@Override
 	public Response api(final String url, final String methodType, final Map<String, String> params, final Map<String, String> headerParams, final String body) throws Exception
 	{
-		LOG.info("Calling api function for url	:	" + url);
+		logger.info("Calling api function for url	:	" + url);
 		Response response = null;
 		try {
 			response = authenticationStrategy.executeFeed(url, methodType, params, headerParams, body);

@@ -30,8 +30,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.Permission;
 import org.brickred.socialauth.exception.ProviderStateException;
 import org.brickred.socialauth.exception.SocialAuthConfigurationException;
@@ -44,12 +42,14 @@ import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.OAuthConsumer;
 import org.brickred.socialauth.util.OpenIdConsumer;
 import org.brickred.socialauth.util.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class Hybrid implements OAuthStrategyBase {
 
 	private static final long serialVersionUID = -1331047094086589944L;
-	private final Log LOG = LogFactory.getLog(Hybrid.class);
+	private final Logger logger = LoggerFactory.getLogger(Hybrid.class);
 
 	private AccessGrant requestToken;
 	private AccessGrant accessToken;
@@ -86,7 +86,7 @@ public class Hybrid implements OAuthStrategyBase {
 					break;
 				}
 			}
-			LOG.debug("ASSOCCIATION : " + assocHandle);
+			logger.debug("ASSOCCIATION : " + assocHandle);
 		} catch (Exception exc) {
 			throw new SocialAuthException("Failed to read response from  ");
 		}
@@ -106,7 +106,7 @@ public class Hybrid implements OAuthStrategyBase {
 		String url = OpenIdConsumer.getRequestTokenURL(
 				endpoints.get(Constants.OAUTH_REQUEST_TOKEN_URL), successUrl,
 				realm, assocHandle, consumerURL, scope);
-		LOG.info("Redirection to following URL should happen : " + url);
+		logger.info("Redirection to following URL should happen : " + url);
 		return url;
 	}
 
@@ -123,7 +123,7 @@ public class Hybrid implements OAuthStrategyBase {
 			throw new ProviderStateException();
 		}
 
-		LOG.debug("Running OpenID discovery");
+		logger.debug("Running OpenID discovery");
 		String reqTokenStr = "";
 		if (this.scope != null) {
 			if (Permission.AUTHENTICATE_ONLY.equals(this.permission)) {
@@ -135,7 +135,7 @@ public class Hybrid implements OAuthStrategyBase {
 				}
 				requestToken = new AccessGrant();
 				requestToken.setKey(reqTokenStr);
-				LOG.debug("Call to fetch Access Token");
+				logger.debug("Call to fetch Access Token");
 				accessToken = oauth.getAccessToken(
 						endpoints.get(Constants.OAUTH_ACCESS_TOKEN_URL),
 						requestToken);
@@ -157,7 +157,7 @@ public class Hybrid implements OAuthStrategyBase {
 			}
 			accessToken.setProviderId(providerId);
 		} else {
-			LOG.warn("No Scope is given for the  Provider : " + providerId);
+			logger.warn("No Scope is given for the  Provider : " + providerId);
 		}
 		return accessToken;
 
@@ -221,7 +221,7 @@ public class Hybrid implements OAuthStrategyBase {
 	@Override
 	public void setAccessTokenParameterName(
 			final String accessTokenParameterName) {
-		LOG.warn("It is not implemented for Hybrid");
+		logger.warn("It is not implemented for Hybrid");
 
 	}
 

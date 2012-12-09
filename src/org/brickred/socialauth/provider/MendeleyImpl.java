@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -49,6 +47,8 @@ import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -65,7 +65,7 @@ public class MendeleyImpl extends AbstractProvider implements AuthProvider,
 	private static final String PROFILE_URL = "https://api.mendeley.com/oapi/profiles/info/me/";
 	private static final String CONTACTS_URL = "https://api.mendeley.com/oapi/profiles/contacts/";
 	private static final Map<String, String> ENDPOINTS;
-	private final Log LOG = LogFactory.getLog(MendeleyImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(MendeleyImpl.class);
 
 	private Permission scope;
 	private boolean isVerify;
@@ -120,7 +120,7 @@ public class MendeleyImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public String getLoginRedirectURL(final String successUrl) throws Exception {
-		LOG.info("Determining URL for redirection");
+		logger.info("Determining URL for redirection");
 		return authenticationStrategy.getLoginRedirectURL(successUrl);
 	}
 
@@ -142,7 +142,7 @@ public class MendeleyImpl extends AbstractProvider implements AuthProvider,
 
 	private Profile doVerifyResponse(final Map<String, String> requestParams)
 			throws Exception {
-		LOG.info("Verifying the authentication response from provider");
+		logger.info("Verifying the authentication response from provider");
 		accessToken = authenticationStrategy.verifyResponse(requestParams);
 		isVerify = true;
 		return getProfile();
@@ -151,7 +151,7 @@ public class MendeleyImpl extends AbstractProvider implements AuthProvider,
 	private Profile getProfile() throws Exception {
 		Profile profile = new Profile();
 		String url = PROFILE_URL;
-		LOG.debug("Obtaining user profile. Profile URL : " + url);
+		logger.debug("Obtaining user profile. Profile URL : " + url);
 		Response serviceResponse = null;
 		try {
 			serviceResponse = authenticationStrategy.executeFeed(url);
@@ -168,7 +168,7 @@ public class MendeleyImpl extends AbstractProvider implements AuthProvider,
 		try {
 			result = serviceResponse
 					.getResponseBodyAsString(Constants.ENCODING);
-			LOG.debug("User Profile :" + result);
+			logger.debug("User Profile :" + result);
 		} catch (Exception exc) {
 			throw new SocialAuthException("Failed to read response from  "
 					+ url, exc);
@@ -228,7 +228,7 @@ public class MendeleyImpl extends AbstractProvider implements AuthProvider,
 		}
 		String url = CONTACTS_URL;
 		List<Contact> plist = new ArrayList<Contact>();
-		LOG.info("Fetching contacts from " + url);
+		logger.info("Fetching contacts from " + url);
 		Response serviceResponse = null;
 		try {
 			serviceResponse = authenticationStrategy.executeFeed(url);
@@ -244,9 +244,9 @@ public class MendeleyImpl extends AbstractProvider implements AuthProvider,
 			throw new ServerDataException("Failed to get response from " + url);
 		}
 		try {
-			LOG.debug("User Contacts list in json : " + result);
+			logger.debug("User Contacts list in json : " + result);
 			JSONArray data = new JSONArray(result);
-			LOG.debug("Found contacts : " + data.length());
+			logger.debug("Found contacts : " + data.length());
 			for (int i = 0; i < data.length(); i++) {
 				JSONObject obj = data.getJSONObject(i);
 				Contact p = new Contact();
@@ -288,7 +288,7 @@ public class MendeleyImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void setPermission(final Permission p) {
-		LOG.debug("Permission requested : " + p.toString());
+		logger.debug("Permission requested : " + p.toString());
 		this.scope = p;
 	}
 
@@ -320,7 +320,7 @@ public class MendeleyImpl extends AbstractProvider implements AuthProvider,
 					"Please call verifyResponse function first to get Access Token");
 		}
 		Response response = null;
-		LOG.debug("Calling URL : " + url);
+		logger.debug("Calling URL : " + url);
 		response = authenticationStrategy.executeFeed(url, methodType, params,
 				headerParams, body);
 		return response;
@@ -352,7 +352,7 @@ public class MendeleyImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.warn("WARNING: Not implemented for Mendeley");
+		logger.warn("WARNING: Not implemented for Mendeley");
 		throw new SocialAuthException(
 				"Update Status is not implemented for Mendeley");
 	}

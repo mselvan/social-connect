@@ -35,11 +35,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.exception.SocialAuthConfigurationException;
 import org.brickred.socialauth.exception.SocialAuthException;
 import org.brickred.socialauth.util.OAuthConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -55,7 +55,7 @@ public class AuthProviderFactory
 	private static String propFileName = "oauth_consumer.properties";
 	private static Map<String, Class<?>> providerMap;
 	private static Map<String, String> domainMap;
-	private static final Log LOG = LogFactory.getLog(AuthProviderFactory.class);
+	private static final Logger logger = LoggerFactory.getLogger(AuthProviderFactory.class);
 
 	static {
 		providerMap = new HashMap<String, Class<?>>();
@@ -237,7 +237,7 @@ public class AuthProviderFactory
 			Constructor<?> cons = obj.getConstructor(OAuthConfig.class);
 			provider = (AuthProvider) cons.newInstance(conf);
 		} catch (NoSuchMethodException me) {
-			LOG.warn(obj.getName() + " does not implement a constructor " + obj.getName() + "(OAuthConfig providerConfig)");
+			logger.warn(obj.getName() + " does not implement a constructor " + obj.getName() + "(OAuthConfig providerConfig)");
 			provider = (AuthProvider) obj.newInstance();
 		} catch (Exception e) {
 			throw new SocialAuthConfigurationException(e);

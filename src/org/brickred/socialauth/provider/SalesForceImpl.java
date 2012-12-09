@@ -31,8 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -48,6 +46,8 @@ import org.brickred.socialauth.util.MethodType;
 import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.Response;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -61,7 +61,7 @@ public class SalesForceImpl extends AbstractProvider implements AuthProvider,
 
 	private static final long serialVersionUID = 6929330230703360670L;
 	private static final Map<String, String> ENDPOINTS;
-	private final Log LOG = LogFactory.getLog(SalesForceImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(SalesForceImpl.class);
 
 	private OAuthConfig config;
 	private Permission scope;
@@ -123,7 +123,7 @@ public class SalesForceImpl extends AbstractProvider implements AuthProvider,
 
 	@Override
 	public String getLoginRedirectURL(final String successUrl) throws Exception {
-		LOG.info("Determining URL for redirection");
+		logger.info("Determining URL for redirection");
 		setProviderState(true);
 		if (!successUrl.startsWith("https")) {
 			throw new SocialAuthException(
@@ -156,7 +156,7 @@ public class SalesForceImpl extends AbstractProvider implements AuthProvider,
 	 */
 	private Profile doVerifyResponse(final Map<String, String> requestParams)
 			throws Exception {
-		LOG.info("Retrieving Access Token in verify response function");
+		logger.info("Retrieving Access Token in verify response function");
 		if (requestParams.get("error") != null
 				&& "access_denied".equals(requestParams.get("error"))) {
 			throw new UserDeniedPermissionException();
@@ -165,7 +165,7 @@ public class SalesForceImpl extends AbstractProvider implements AuthProvider,
 				MethodType.POST.toString());
 
 		if (accessGrant != null) {
-			LOG.debug("Obtaining user profile");
+			logger.debug("Obtaining user profile");
 			return getProfile();
 		} else {
 			throw new SocialAuthException("Access token not found");
@@ -183,7 +183,7 @@ public class SalesForceImpl extends AbstractProvider implements AuthProvider,
 
 	@Override
 	public List<Contact> getContactList() throws Exception {
-		LOG.warn("WARNING: Not implemented for SalesForce");
+		logger.warn("WARNING: Not implemented for SalesForce");
 		throw new SocialAuthException(
 				"Retrieving contacts is not implemented for SalesForce");
 
@@ -200,7 +200,7 @@ public class SalesForceImpl extends AbstractProvider implements AuthProvider,
 
 	@Override
 	public void updateStatus(final String msg) throws Exception {
-		LOG.warn("WARNING: Not implemented for SalesForce");
+		logger.warn("WARNING: Not implemented for SalesForce");
 		throw new SocialAuthException(
 				"Update Status is not implemented for SalesForce");
 
@@ -223,7 +223,7 @@ public class SalesForceImpl extends AbstractProvider implements AuthProvider,
 		if (accessGrant.getAttribute("id") != null) {
 			profileURL = (String) accessGrant.getAttribute("id");
 		}
-		LOG.debug("Profile URL : " + profileURL);
+		logger.debug("Profile URL : " + profileURL);
 		Profile p = new Profile();
 		Map<String, String> headerParam = new HashMap<String, String>();
 		headerParam.put("Authorization", "OAuth " + accessGrant.getKey());
@@ -244,7 +244,7 @@ public class SalesForceImpl extends AbstractProvider implements AuthProvider,
 		try {
 			result = serviceResponse
 					.getResponseBodyAsString(Constants.ENCODING);
-			LOG.debug("User Profile :" + result);
+			logger.debug("User Profile :" + result);
 		} catch (Exception e) {
 			throw new SocialAuthException("Failed to read response from  "
 					+ profileURL, e);
@@ -296,7 +296,7 @@ public class SalesForceImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void setPermission(final Permission p) {
-		LOG.debug("Permission requested : " + p.toString());
+		logger.debug("Permission requested : " + p.toString());
 		this.scope = p;
 		authenticationStrategy.setPermission(scope);
 		authenticationStrategy.setScope(getScope());
@@ -322,7 +322,7 @@ public class SalesForceImpl extends AbstractProvider implements AuthProvider,
 			final Map<String, String> params,
 			final Map<String, String> headerParams, final String body)
 			throws Exception {
-		LOG.info("Calling api function for url	:	" + url);
+		logger.info("Calling api function for url	:	" + url);
 		Response response = null;
 		try {
 			response = authenticationStrategy.executeFeed(url, methodType,
@@ -361,7 +361,7 @@ public class SalesForceImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.warn("WARNING: Not implemented for SalesForce");
+		logger.warn("WARNING: Not implemented for SalesForce");
 		throw new SocialAuthException(
 				"Update Status is not implemented for SalesForce");
 	}

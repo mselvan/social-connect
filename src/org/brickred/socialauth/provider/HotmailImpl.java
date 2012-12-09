@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -52,6 +50,8 @@ import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -73,7 +73,7 @@ public class HotmailImpl extends AbstractProvider implements AuthProvider,
 	private static final String UPDATE_STATUS_URL = "https://apis.live.net/v5.0/me/share";
 	private static final String PROFILE_PICTURE_URL = "https://apis.live.net/v5.0/me/picture?access_token=%1$s";
 	private static final Map<String, String> ENDPOINTS;
-	private final Log LOG = LogFactory.getLog(HotmailImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(HotmailImpl.class);
 
 	private Permission scope;
 	private boolean isVerify;
@@ -159,7 +159,7 @@ public class HotmailImpl extends AbstractProvider implements AuthProvider,
 
 	private Profile doVerifyResponse(final Map<String, String> requestParams)
 			throws Exception {
-		LOG.info("Retrieving Access Token in verify response function");
+		logger.info("Retrieving Access Token in verify response function");
 
 		if (requestParams.get("wrap_error_reason") != null
 				&& "user_denied".equals(requestParams.get("wrap_error_reason"))) {
@@ -170,7 +170,7 @@ public class HotmailImpl extends AbstractProvider implements AuthProvider,
 
 		if (accessGrant != null) {
 			isVerify = true;
-			LOG.debug("Obtaining user profile");
+			logger.debug("Obtaining user profile");
 			return getProfile();
 		} else {
 			throw new SocialAuthException("Unable to get Access token");
@@ -192,7 +192,7 @@ public class HotmailImpl extends AbstractProvider implements AuthProvider,
 			throw new SocialAuthException(
 					"You have not set permission to get contacts");
 		}
-		LOG.info("Fetching contacts from " + CONTACTS_URL);
+		logger.info("Fetching contacts from " + CONTACTS_URL);
 		return getContacts(CONTACTS_URL);
 	}
 
@@ -216,12 +216,12 @@ public class HotmailImpl extends AbstractProvider implements AuthProvider,
 			throw new ServerDataException("Failed to get response from " + url,
 					e);
 		}
-		LOG.debug("User Contacts list in JSON " + result);
+		logger.debug("User Contacts list in JSON " + result);
 		JSONObject resp = new JSONObject(result);
 		List<Contact> plist = new ArrayList<Contact>();
 		if (resp.has("data")) {
 			JSONArray addArr = resp.getJSONArray("data");
-			LOG.debug("Contacts Found : " + addArr.length());
+			logger.debug("Contacts Found : " + addArr.length());
 			for (int i = 0; i < addArr.length(); i++) {
 				JSONObject obj = addArr.getJSONObject(i);
 				Contact p = new Contact();
@@ -260,7 +260,7 @@ public class HotmailImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void updateStatus(final String msg) throws Exception {
-		LOG.info("Updating status : " + msg);
+		logger.info("Updating status : " + msg);
 		if (!isVerify) {
 			throw new SocialAuthException(
 					"Please call verifyResponse function first to get Access Token");
@@ -278,7 +278,7 @@ public class HotmailImpl extends AbstractProvider implements AuthProvider,
 				MethodType.POST.toString(), null, headerParam, body);
 
 		int code = serviceResponse.getStatus();
-		LOG.debug("Status updated and return status code is :" + code);
+		logger.debug("Status updated and return status code is :" + code);
 		// return 201
 		serviceResponse.close();
 	}
@@ -307,7 +307,7 @@ public class HotmailImpl extends AbstractProvider implements AuthProvider,
 		try {
 			result = serviceResponse
 					.getResponseBodyAsString(Constants.ENCODING);
-			LOG.debug("User Profile :" + result);
+			logger.debug("User Profile :" + result);
 		} catch (Exception e) {
 			throw new SocialAuthException("Failed to read response from  "
 					+ PROFILE_URL, e);
@@ -414,7 +414,7 @@ public class HotmailImpl extends AbstractProvider implements AuthProvider,
 			final Map<String, String> params,
 			final Map<String, String> headerParams, final String body)
 			throws Exception {
-		LOG.debug("Calling URL : " + url);
+		logger.debug("Calling URL : " + url);
 		Response serviceResponse;
 		try {
 			serviceResponse = authenticationStrategy.executeFeed(url,
@@ -424,7 +424,7 @@ public class HotmailImpl extends AbstractProvider implements AuthProvider,
 					"Error while making request to URL : " + url, e);
 		}
 		if (serviceResponse.getStatus() != 200) {
-			LOG.debug("Return statuc for URL " + url + " is "
+			logger.debug("Return statuc for URL " + url + " is "
 					+ serviceResponse.getStatus());
 			throw new SocialAuthException("Error while making request to URL :"
 					+ url + "Status : " + serviceResponse.getStatus());
@@ -458,7 +458,7 @@ public class HotmailImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.warn("WARNING: Not implemented for Hotmail");
+		logger.warn("WARNING: Not implemented for Hotmail");
 		throw new SocialAuthException(
 				"Update Status is not implemented for Hotmail");
 	}

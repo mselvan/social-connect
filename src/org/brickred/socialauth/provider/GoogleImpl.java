@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -51,6 +49,8 @@ import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.OpenIdConsumer;
 import org.brickred.socialauth.util.Response;
 import org.brickred.socialauth.util.XMLParseUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -68,7 +68,7 @@ public class GoogleImpl extends AbstractProvider implements AuthProvider,
 	private static final String CONTACTS_FEED_URL = "http://www.google.com/m8/feeds/contacts/default/full/?max-results=1000";
 	private static final String CONTACT_NAMESPACE = "http://schemas.google.com/g/2005";
 	private static final Map<String, String> ENDPOINTS;
-	private final Log LOG = LogFactory.getLog(GoogleImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(GoogleImpl.class);
 
 	private Permission scope;
 	private AccessGrant accessToken;
@@ -126,7 +126,7 @@ public class GoogleImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public String getLoginRedirectURL(final String successUrl) throws Exception {
 		String url = authenticationStrategy.getLoginRedirectURL(successUrl);
-		LOG.info("Redirection to following URL should happen : " + url);
+		logger.info("Redirection to following URL should happen : " + url);
 		return url;
 
 	}
@@ -148,27 +148,27 @@ public class GoogleImpl extends AbstractProvider implements AuthProvider,
 
 	private Profile doVerifyResponse(final Map<String, String> requestParams)
 			throws Exception {
-		LOG.info("Verifying the authentication response from provider");
-		LOG.debug("Verifying the authentication response from provider");
+		logger.info("Verifying the authentication response from provider");
+		logger.debug("Verifying the authentication response from provider");
 		if (requestParams.get("openid.mode") != null
 				&& "cancel".equals(requestParams.get("openid.mode"))) {
 			throw new UserDeniedPermissionException();
 		}
 		accessToken = authenticationStrategy.verifyResponse(requestParams);
-		LOG.debug("Obtaining profile from OpenID response");
+		logger.debug("Obtaining profile from OpenID response");
 		return getProfile(requestParams);
 	}
 
 	private Profile getProfile(final Map<String, String> requestParams) {
 		userProfile = OpenIdConsumer.getUserInfo(requestParams);
 		userProfile.setProviderId(getProviderId());
-		LOG.debug("User Info : " + userProfile.toString());
+		logger.debug("User Info : " + userProfile.toString());
 		return userProfile;
 	}
 
 	@Override
 	public void updateStatus(final String msg) throws Exception {
-		LOG.warn("WARNING: Not implemented for Google");
+		logger.warn("WARNING: Not implemented for Google");
 		throw new SocialAuthException(
 				"Update Status is not implemented for Gmail");
 	}
@@ -183,7 +183,7 @@ public class GoogleImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public List<Contact> getContactList() throws Exception {
-		LOG.info("Fetching contacts from " + CONTACTS_FEED_URL);
+		logger.info("Fetching contacts from " + CONTACTS_FEED_URL);
 		if (Permission.AUTHENTICATE_ONLY.equals(this.scope)) {
 			throw new SocialAuthException(
 					"You have not set Permission to get contacts.");
@@ -210,7 +210,7 @@ public class GoogleImpl extends AbstractProvider implements AuthProvider,
 		}
 		NodeList contactsList = root.getElementsByTagName("entry");
 		if (contactsList != null && contactsList.getLength() > 0) {
-			LOG.debug("Found contacts : " + contactsList.getLength());
+			logger.debug("Found contacts : " + contactsList.getLength());
 			for (int i = 0; i < contactsList.getLength(); i++) {
 				Element contact = (Element) contactsList.item(i);
 				String fname = "";
@@ -264,7 +264,7 @@ public class GoogleImpl extends AbstractProvider implements AuthProvider,
 				}
 			}
 		} else {
-			LOG.debug("No contacts were obtained from the feed : "
+			logger.debug("No contacts were obtained from the feed : "
 					+ CONTACTS_FEED_URL);
 		}
 		return plist;
@@ -287,7 +287,7 @@ public class GoogleImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void setPermission(final Permission p) {
-		LOG.debug("Permission requested : " + p.toString());
+		logger.debug("Permission requested : " + p.toString());
 		this.scope = p;
 		authenticationStrategy.setPermission(scope);
 		authenticationStrategy.setScope(getScope());
@@ -321,7 +321,7 @@ public class GoogleImpl extends AbstractProvider implements AuthProvider,
 			throw new SocialAuthException(
 					"Only GET method is implemented in Google API function");
 		}
-		LOG.debug("Calling URL : " + url);
+		logger.debug("Calling URL : " + url);
 		try {
 			serviceResponse = authenticationStrategy.executeFeed(url,
 					methodType, params, headerParams, body);
@@ -367,7 +367,7 @@ public class GoogleImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.warn("WARNING: Not implemented for Google");
+		logger.warn("WARNING: Not implemented for Google");
 		throw new SocialAuthException(
 				"Update Status is not implemented for Google");
 	}

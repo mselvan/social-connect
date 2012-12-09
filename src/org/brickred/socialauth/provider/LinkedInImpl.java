@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -50,6 +48,8 @@ import org.brickred.socialauth.util.MethodType;
 import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.Response;
 import org.brickred.socialauth.util.XMLParseUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -69,10 +69,10 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 	private static final long serialVersionUID = -6141448721085510813L;
 	private static final String CONNECTION_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,public-profile-url)";
 	private static final String UPDATE_STATUS_URL = "http://api.linkedin.com/v1/people/~/shares";
-	private static final String PROFILE_URL = "http://api.linkedin.com/v1/people/~:(id,first-name,last-name,languages,date-of-birth,picture-url,location:(name))";
+	private static final String PROFILE_URL = "http://api.linkedin.com/v1/people/~:(id,email-address,first-name,last-name,languages,date-of-birth,picture-url,location:(name))";
 	private static final String STATUS_BODY = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><share><comment>%1$s</comment><visibility><code>anyone</code></visibility></share>";
 	private static final Map<String, String> ENDPOINTS;
-	private final Log LOG = LogFactory.getLog(LinkedInImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(LinkedInImpl.class);
 
 	private Permission scope;
 	private AccessGrant accessToken;
@@ -82,12 +82,9 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 
 	static {
 		ENDPOINTS = new HashMap<String, String>();
-		ENDPOINTS.put(Constants.OAUTH_REQUEST_TOKEN_URL,
-				"https://api.linkedin.com/uas/oauth/requestToken");
-		ENDPOINTS.put(Constants.OAUTH_AUTHORIZATION_URL,
-				"https://api.linkedin.com/uas/oauth/authenticate");
-		ENDPOINTS.put(Constants.OAUTH_ACCESS_TOKEN_URL,
-				"https://api.linkedin.com/uas/oauth/accessToken");
+		ENDPOINTS.put(Constants.OAUTH_REQUEST_TOKEN_URL, "https://api.linkedin.com/uas/oauth/requestToken");
+		ENDPOINTS.put(Constants.OAUTH_AUTHORIZATION_URL, "https://api.linkedin.com/uas/oauth/authenticate");
+		ENDPOINTS.put(Constants.OAUTH_ACCESS_TOKEN_URL, "https://api.linkedin.com/uas/oauth/accessToken");
 	}
 
 	/**
@@ -100,7 +97,13 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 	 */
 	public LinkedInImpl(final OAuthConfig providerConfig) throws Exception {
 		config = providerConfig;
+		accessToken = null;
+		if (config.getCustomPermissions() != null) {
+			scope = Permission.CUSTOM;
+		}
 		authenticationStrategy = new OAuth1(config, ENDPOINTS);
+		authenticationStrategy.setPermission(scope);
+		authenticationStrategy.setScope(getScope());
 	}
 
 	/**
@@ -148,7 +151,7 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 
 	private Profile doVerifyResponse(final Map<String, String> requestParams)
 			throws Exception {
-		LOG.info("Verifying the authentication response from provider");
+		logger.info("Verifying the authentication response from provider");
 		accessToken = authenticationStrategy.verifyResponse(requestParams);
 		return getProfile();
 	}
@@ -162,7 +165,7 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 
 	@Override
 	public List<Contact> getContactList() throws Exception {
-		LOG.info("Fetching contacts from " + CONNECTION_URL);
+		logger.info("Fetching contacts from " + CONNECTION_URL);
 		Response serviceResponse = null;
 		try {
 			serviceResponse = authenticationStrategy
@@ -185,7 +188,7 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 		if (root != null) {
 			NodeList pList = root.getElementsByTagName("person");
 			if (pList != null && pList.getLength() > 0) {
-				LOG.debug("Found contacts : " + pList.getLength());
+				logger.debug("Found contacts : " + pList.getLength());
 				for (int i = 0; i < pList.getLength(); i++) {
 					Element p = (Element) pList.item(i);
 					String fname = XMLParseUtil.getElementData(p, "first-name");
@@ -209,7 +212,7 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 					}
 				}
 			} else {
-				LOG.debug("No connections were obtained from : "
+				logger.debug("No connections were obtained from : "
 						+ CONNECTION_URL);
 			}
 		}
@@ -225,7 +228,7 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 			throw new ServerDataException(
 					"Status cannot be more than 700 characters.");
 		}
-		LOG.info("Updating status " + msg + " on " + UPDATE_STATUS_URL);
+		logger.info("Updating status " + msg + " on " + UPDATE_STATUS_URL);
 		Map<String, String> headerParams = new HashMap<String, String>();
 		headerParams.put("Content-Type", "text/xml");
 		String msgBody = String.format(STATUS_BODY, msg);
@@ -238,7 +241,7 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 			throw new SocialAuthException("Failed to update status on "
 					+ UPDATE_STATUS_URL, ie);
 		}
-		LOG.debug("Status Updated and return status code is : "
+		logger.debug("Status Updated and return status code is : "
 				+ serviceResponse.getStatus());
 		// return 201
 	}
@@ -253,7 +256,7 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 	}
 
 	private Profile getProfile() throws Exception {
-		LOG.debug("Obtaining user profile");
+		logger.debug("Obtaining user profile");
 		Profile profile = new Profile();
 		Response serviceResponse = null;
 		try {
@@ -282,6 +285,7 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 		if (root != null) {
 			String fname = XMLParseUtil.getElementData(root, "first-name");
 			String lname = XMLParseUtil.getElementData(root, "last-name");
+			String email = XMLParseUtil.getElementData(root, "email-address");
 			NodeList dob = root.getElementsByTagName("date-of-birth");
 			if (dob != null && dob.getLength() > 0) {
 				Element dobel = (Element) dob.item(0);
@@ -317,9 +321,11 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 			}
 			profile.setFirstName(fname);
 			profile.setLastName(lname);
+			profile.setEmail(email);
 			profile.setValidatedId(id);
 			profile.setProviderId(getProviderId());
-			LOG.debug("User Profile :" + profile.toString());
+			logger.debug("Data from linkedin - " + root.getTextContent());
+			logger.debug("User Profile :" + profile.toString());
 			userProfile = profile;
 		}
 		return profile;
@@ -333,8 +339,10 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void setPermission(final Permission p) {
-		LOG.debug("Permission requested : " + p.toString());
+		logger.debug("Permission requested : " + p.toString());
 		this.scope = p;
+		authenticationStrategy.setPermission(scope);
+		authenticationStrategy.setScope(getScope());
 	}
 
 	/**
@@ -360,7 +368,7 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 			final Map<String, String> params,
 			final Map<String, String> headerParams, final String body)
 			throws Exception {
-		LOG.debug("Calling URL : " + url);
+		logger.debug("Calling URL : " + url);
 		return authenticationStrategy.executeFeed(url, methodType, params,
 				headerParams, body);
 	}
@@ -391,8 +399,28 @@ public class LinkedInImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.warn("WARNING: Not implemented for LinkedIn");
+		logger.warn("WARNING: Not implemented for LinkedIn");
 		throw new SocialAuthException(
 				"Update Status is not implemented for LinkedIn");
+	}
+
+	private String getScope()
+	{
+		String scopeStr;
+		if (Permission.AUTHENTICATE_ONLY.equals(scope)) {
+			scopeStr = null;
+		} else if (Permission.CUSTOM.equals(scope)) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("?scope=");
+			String arr[] = config.getCustomPermissions().split(",");
+			sb.append(arr[0]);
+			for (int i = 1; i < arr.length; i++) {
+				sb.append("+").append(arr[i]);
+			}
+			scopeStr = sb.toString();
+		} else {
+			scopeStr = "";
+		}
+		return scopeStr;
 	}
 }

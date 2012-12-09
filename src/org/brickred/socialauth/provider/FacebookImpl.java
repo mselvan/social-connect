@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -52,6 +50,8 @@ import org.brickred.socialauth.util.OAuthConfig;
 import org.brickred.socialauth.util.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -71,7 +71,7 @@ public class FacebookImpl extends AbstractProvider implements AuthProvider,
 	private static final String PUBLIC_PROFILE_URL = "http://www.facebook.com/profile.php?id=";
 	private static final String IMAGE_UPLOAD_URL = "https://graph.facebook.com/me/photos";
 	private static final Map<String, String> ENDPOINTS;
-	private final Log LOG = LogFactory.getLog(FacebookImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(FacebookImpl.class);
 
 	private Permission scope;
 	private OAuthConfig config;
@@ -155,7 +155,7 @@ public class FacebookImpl extends AbstractProvider implements AuthProvider,
 
 	private Profile doVerifyResponse(final Map<String, String> requestParams)
 			throws Exception {
-		LOG.info("Retrieving Access Token in verify response function");
+		logger.info("Retrieving Access Token in verify response function");
 		if (requestParams.get("error_reason") != null
 				&& "user_denied".equals(requestParams.get("error_reason"))) {
 			throw new UserDeniedPermissionException();
@@ -163,7 +163,7 @@ public class FacebookImpl extends AbstractProvider implements AuthProvider,
 		accessGrant = authenticationStrategy.verifyResponse(requestParams);
 
 		if (accessGrant != null) {
-			LOG.debug("Obtaining user profile");
+			logger.debug("Obtaining user profile");
 			return authFacebookLogin();
 		} else {
 			throw new SocialAuthException("Access token not found");
@@ -181,7 +181,7 @@ public class FacebookImpl extends AbstractProvider implements AuthProvider,
 					+ PROFILE_URL, e);
 		}
 		try {
-			LOG.debug("User Profile : " + presp);
+			logger.debug("User Profile : " + presp);
 			JSONObject resp = new JSONObject(presp);
 			Profile p = new Profile();
 			p.setValidatedId(resp.getString("id"));
@@ -238,7 +238,7 @@ public class FacebookImpl extends AbstractProvider implements AuthProvider,
 
 	@Override
 	public void updateStatus(final String msg) throws Exception {
-		LOG.info("Updating status : " + msg);
+		logger.info("Updating status : " + msg);
 		if (msg == null || msg.trim().length() == 0) {
 			throw new ServerDataException("Status cannot be blank");
 		}
@@ -272,7 +272,7 @@ public class FacebookImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public List<Contact> getContactList() throws Exception {
 		List<Contact> plist = new ArrayList<Contact>();
-		LOG.info("Fetching contacts from " + CONTACTS_URL);
+		logger.info("Fetching contacts from " + CONTACTS_URL);
 		String respStr;
 		try {
 			Response response = authenticationStrategy
@@ -283,10 +283,10 @@ public class FacebookImpl extends AbstractProvider implements AuthProvider,
 					+ CONTACTS_URL, e);
 		}
 		try {
-			LOG.debug("User Contacts list in json : " + respStr);
+			logger.debug("User Contacts list in json : " + respStr);
 			JSONObject resp = new JSONObject(respStr);
 			JSONArray data = resp.getJSONArray("data");
-			LOG.debug("Found contacts : " + data.length());
+			logger.debug("Found contacts : " + data.length());
 			for (int i = 0; i < data.length(); i++) {
 				JSONObject obj = data.getJSONObject(i);
 				Contact p = new Contact();
@@ -329,7 +329,7 @@ public class FacebookImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void setPermission(final Permission p) {
-		LOG.debug("Permission requested : " + p.toString());
+		logger.debug("Permission requested : " + p.toString());
 		this.scope = p;
 		authenticationStrategy.setPermission(this.scope);
 		authenticationStrategy.setScope(getScope());
@@ -356,7 +356,7 @@ public class FacebookImpl extends AbstractProvider implements AuthProvider,
 			final Map<String, String> params,
 			final Map<String, String> headerParams, final String body)
 			throws Exception {
-		LOG.info("Calling api function for url	:	" + url);
+		logger.info("Calling api function for url	:	" + url);
 		Response response = null;
 		try {
 			response = authenticationStrategy.executeFeed(url, methodType,
@@ -394,14 +394,14 @@ public class FacebookImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.info("Uploading Image :: " + fileName + ", status message :: "
+		logger.info("Uploading Image :: " + fileName + ", status message :: "
 				+ message);
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("name", message);
 		Response response = authenticationStrategy.uploadImage(
 				IMAGE_UPLOAD_URL, MethodType.POST.toString(), map, null,
 				fileName, inputStream, null);
-		LOG.info("Upload Image status::" + response.getStatus());
+		logger.info("Upload Image status::" + response.getStatus());
 		return response;
 	}
 

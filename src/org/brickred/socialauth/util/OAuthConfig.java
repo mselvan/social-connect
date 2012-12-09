@@ -43,6 +43,7 @@ public class OAuthConfig implements Serializable {
 	private String id;
 	private Class<?> providerImplClass;
 	private String customPermissions;
+	private String linkedInScope;
 
 	/**
 	 * 
@@ -174,6 +175,16 @@ public class OAuthConfig implements Serializable {
 
 	public void setCustomPermissions(final String customPermissions) {
 		this.customPermissions = customPermissions;
+	}
+
+	public String getLinkedInScope()
+	{
+		return linkedInScope;
+	}
+
+	public void setLinkedInScope(String linkedInScope)
+	{
+		this.linkedInScope = linkedInScope;
 	}
 
 }

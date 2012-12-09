@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.AbstractProvider;
 import org.brickred.socialauth.AuthProvider;
 import org.brickred.socialauth.Contact;
@@ -52,6 +50,8 @@ import org.brickred.socialauth.util.Response;
 import org.brickred.socialauth.util.XMLParseUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -70,7 +70,7 @@ public class YahooImpl extends AbstractProvider implements AuthProvider,
 	private static final String PROFILE_URL = "http://social.yahooapis.com/v1/user/%1$s/profile?format=json";
 	private static final String CONTACTS_URL = "http://social.yahooapis.com/v1/user/%1$s/contacts;count=max";
 	private static final String UPDATE_STATUS_URL = "http://social.yahooapis.com/v1/user/%1$s/profile/status";
-	private final Log LOG = LogFactory.getLog(YahooImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(YahooImpl.class);
 	private static final Map<String, String> ENDPOINTS;
 
 	private Permission scope;
@@ -156,13 +156,13 @@ public class YahooImpl extends AbstractProvider implements AuthProvider,
 
 	private Profile doVerifyResponse(final Map<String, String> requestParams)
 			throws Exception {
-		LOG.info("Verifying the authentication response from provider");
+		logger.info("Verifying the authentication response from provider");
 		accessToken = authenticationStrategy.verifyResponse(requestParams);
 		return getProfile();
 	}
 
 	private Profile getProfile() throws Exception {
-		LOG.debug("Obtaining user profile");
+		logger.debug("Obtaining user profile");
 		Profile profile = new Profile();
 		String guid = (String) accessToken.getAttribute("xoauth_yahoo_guid");
 		if (guid.indexOf("<") != -1) {
@@ -186,7 +186,7 @@ public class YahooImpl extends AbstractProvider implements AuthProvider,
 		try {
 			result = serviceResponse
 					.getResponseBodyAsString(Constants.ENCODING);
-			LOG.debug("User Profile :" + result);
+			logger.debug("User Profile :" + result);
 		} catch (Exception exc) {
 			throw new SocialAuthException("Failed to read response from  "
 					+ url, exc);
@@ -272,7 +272,7 @@ public class YahooImpl extends AbstractProvider implements AuthProvider,
 	public List<Contact> getContactList() throws Exception {
 		String url = String.format(CONTACTS_URL,
 				accessToken.getAttribute("xoauth_yahoo_guid"));
-		LOG.info("Fetching contacts from " + url);
+		logger.info("Fetching contacts from " + url);
 
 		Response serviceResponse = null;
 		try {
@@ -293,7 +293,7 @@ public class YahooImpl extends AbstractProvider implements AuthProvider,
 		}
 		NodeList contactsList = root.getElementsByTagName("contact");
 		if (contactsList != null && contactsList.getLength() > 0) {
-			LOG.debug("Found contacts : " + contactsList.getLength());
+			logger.debug("Found contacts : " + contactsList.getLength());
 			for (int i = 0; i < contactsList.getLength(); i++) {
 				Element contact = (Element) contactsList.item(i);
 				NodeList fieldList = contact.getElementsByTagName("fields");
@@ -347,7 +347,7 @@ public class YahooImpl extends AbstractProvider implements AuthProvider,
 				}
 			}
 		} else {
-			LOG.debug("No contacts were obtained from : " + CONTACTS_URL);
+			logger.debug("No contacts were obtained from : " + CONTACTS_URL);
 		}
 		return plist;
 	}
@@ -367,7 +367,7 @@ public class YahooImpl extends AbstractProvider implements AuthProvider,
 		}
 		String url = String.format(UPDATE_STATUS_URL,
 				accessToken.getAttribute("xoauth_yahoo_guid"));
-		LOG.info("Updating status " + msg + " on " + url);
+		logger.info("Updating status " + msg + " on " + url);
 		String msgBody = "{\"status\":{\"message\":\"" + msg + "\"}}";
 		Response serviceResponse = null;
 		try {
@@ -383,7 +383,7 @@ public class YahooImpl extends AbstractProvider implements AuthProvider,
 					"Failed to update status. Return status code :"
 							+ serviceResponse.getStatus());
 		}
-		LOG.debug("Status Updated and return status code is : "
+		logger.debug("Status Updated and return status code is : "
 				+ serviceResponse.getStatus());
 		// return 204
 
@@ -406,7 +406,7 @@ public class YahooImpl extends AbstractProvider implements AuthProvider,
 	 */
 	@Override
 	public void setPermission(final Permission p) {
-		LOG.debug("Permission requested : " + p.toString());
+		logger.debug("Permission requested : " + p.toString());
 		this.scope = p;
 	}
 
@@ -441,7 +441,7 @@ public class YahooImpl extends AbstractProvider implements AuthProvider,
 
 		String urlStr = String.format(url,
 				accessToken.getAttribute("xoauth_yahoo_guid"));
-		LOG.debug("Calling URL : " + urlStr);
+		logger.debug("Calling URL : " + urlStr);
 
 		return authenticationStrategy.executeFeed(urlStr, methodType, params,
 				headerParams, body);
@@ -473,7 +473,7 @@ public class YahooImpl extends AbstractProvider implements AuthProvider,
 	@Override
 	public Response uploadImage(final String message, final String fileName,
 			final InputStream inputStream) throws Exception {
-		LOG.warn("WARNING: Not implemented for Yahoo");
+		logger.warn("WARNING: Not implemented for Yahoo");
 		throw new SocialAuthException(
 				"Update Status is not implemented for Yahoo");
 	}

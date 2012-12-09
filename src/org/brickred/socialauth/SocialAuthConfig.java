@@ -35,13 +35,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brickred.socialauth.exception.SocialAuthConfigurationException;
 import org.brickred.socialauth.exception.SocialAuthException;
 import org.brickred.socialauth.util.Constants;
 import org.brickred.socialauth.util.HttpUtil;
 import org.brickred.socialauth.util.OAuthConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -62,7 +62,7 @@ public class SocialAuthConfig implements Serializable {
 	private Properties applicationProperties;
 	private Map<String, String> domainMap;
 	private boolean configSetup;
-	private static final Log LOG = LogFactory.getLog(SocialAuthConfig.class);
+	private static final Logger logger = LoggerFactory.getLogger(SocialAuthConfig.class);
 	private static SocialAuthConfig DEFAULT = new SocialAuthConfig();
 	private boolean isConfigLoaded;
 
@@ -147,7 +147,7 @@ public class SocialAuthConfig implements Serializable {
 	 */
 	public void addProvider(final String pname, final Class<?> clazz)
 			throws Exception {
-		LOG.debug("Registering a provider " + pname);
+		logger.debug("Registering a provider " + pname);
 		providersImplMap.put(pname, clazz);
 	}
 
@@ -168,7 +168,7 @@ public class SocialAuthConfig implements Serializable {
 	 */
 	public void setApplicationProperties(final Properties applicationProperties)
 			throws Exception {
-		LOG.info("Loading application properties");
+		logger.info("Loading application properties");
 		this.applicationProperties = applicationProperties;
 		load(this.applicationProperties);
 	}
@@ -184,7 +184,7 @@ public class SocialAuthConfig implements Serializable {
 	 */
 	public void load(final InputStream inputStream) throws Exception {
 		if (!isConfigLoaded) {
-			LOG.debug("Loading application configuration through input stream.");
+			logger.debug("Loading application configuration through input stream.");
 			Properties props = new Properties();
 			try {
 				props.load(inputStream);
@@ -205,8 +205,8 @@ public class SocialAuthConfig implements Serializable {
 	 */
 	public void load(final Properties properties) throws Exception {
 		if (!isConfigLoaded) {
-			LOG.info("Loading application configuration");
-			LOG.debug("Loading application configuration through properties. Given properties are :"
+			logger.info("Loading application configuration");
+			logger.debug("Loading application configuration through properties. Given properties are :"
 					+ properties);
 			this.applicationProperties = properties;
 			registerProviders();
@@ -223,7 +223,7 @@ public class SocialAuthConfig implements Serializable {
 				try {
 					time = Integer.parseInt(timeout);
 				} catch (NumberFormatException ne) {
-					LOG.warn("Http connection timout is not an integer in configuration");
+					logger.warn("Http connection timout is not an integer in configuration");
 				}
 				HttpUtil.setConnectionTimeout(time);
 			}
@@ -241,7 +241,7 @@ public class SocialAuthConfig implements Serializable {
 	 */
 	public void load(final String fileName) throws Exception {
 		if (!isConfigLoaded) {
-			LOG.debug("Loading application configuration from file " + fileName);
+			logger.debug("Loading application configuration from file " + fileName);
 			ClassLoader loader = SocialAuthConfig.class.getClassLoader();
 			try {
 				InputStream in = loader.getResourceAsStream(fileName);
@@ -260,7 +260,7 @@ public class SocialAuthConfig implements Serializable {
 	 */
 	public void load() throws Exception {
 		if (!isConfigLoaded) {
-			LOG.debug("Loading application configuration from file "
+			logger.debug("Loading application configuration from file "
 					+ OAUTH_CONSUMER_PROPS);
 			load(OAUTH_CONSUMER_PROPS);
 		}
@@ -278,7 +278,7 @@ public class SocialAuthConfig implements Serializable {
 	public void addProviderConfig(final String providerId,
 			final OAuthConfig config) throws Exception {
 		config.setId(providerId);
-		LOG.debug("Adding provider configuration :" + config);
+		logger.debug("Adding provider configuration :" + config);
 		providersConfig.put(providerId, config);
 		if (!providersImplMap.containsKey(providerId)) {
 			if (config.getProviderImplClass() != null) {
@@ -297,7 +297,7 @@ public class SocialAuthConfig implements Serializable {
 			String cSecret = applicationProperties.getProperty(value
 					+ ".consumer_secret");
 			if (cKey != null && cSecret != null) {
-				LOG.debug("Loading configuration for provider : " + key);
+				logger.debug("Loading configuration for provider : " + key);
 				OAuthConfig conf = new OAuthConfig(cKey, cSecret);
 				conf.setId(key);
 				conf.setProviderImplClass(providersImplMap.get(key));
@@ -311,7 +311,7 @@ public class SocialAuthConfig implements Serializable {
 				}
 				providersConfig.put(key, conf);
 			} else {
-				LOG.debug("Configuration for provider " + key
+				logger.debug("Configuration for provider " + key
 						+ " is not available");
 			}
 		}
@@ -377,7 +377,7 @@ public class SocialAuthConfig implements Serializable {
 				try {
 					port = Integer.parseInt(proxyPort);
 				} catch (NumberFormatException ne) {
-					LOG.warn("Proxy port is not an integer in configuration");
+					logger.warn("Proxy port is not an integer in configuration");
 				}
 			}
 			HttpUtil.setProxyConfig(proxyHost, port);
