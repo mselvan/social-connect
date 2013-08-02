@@ -205,7 +205,9 @@ public class GoogleOAuth2Impl extends AbstractProvider implements AuthProvider, 
 				if (locale != null) {
 					String a[] = locale.split("-");
 					p.setLanguage(a[0]);
-					p.setCountry(a[1]);
+					if(a.length > 1){
+						p.setCountry(a[1]);
+					}
 				}
 			}
 			p.setProviderId(getProviderId());
